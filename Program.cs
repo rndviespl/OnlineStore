@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using WebApp2.Data;
+
 namespace WebApp2
 {
     public class Program
@@ -6,6 +9,13 @@ namespace WebApp2
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // Регистрация ApplicationContext с зависимостями
+            builder.Services.AddDbContext<ApplicationContext>((serviceProvider, options) =>
+            {
+                var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+                var connectionString = configuration.GetConnectionString("Default");
+                options.UseMySql(connectionString, Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.39-mysql"));
+            });
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
@@ -29,6 +39,9 @@ namespace WebApp2
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
+            app.MapControllerRoute(
+                name: "product",
+                pattern: "{controller=BrosShopProducts}/{action=Index}/{id?}");
 
             app.Run();
         }

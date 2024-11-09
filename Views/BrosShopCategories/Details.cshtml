@@ -1,0 +1,24 @@
+﻿@model WebApp2.Models.BrosShopCategory
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>BrosShopCategory</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.BrosShopCategoryTitle)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.BrosShopCategoryTitle)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.BrosShopCategoryId">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

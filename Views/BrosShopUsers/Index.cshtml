@@ -1,0 +1,65 @@
+﻿@model IEnumerable<WebApp2.Models.BrosShopUser>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.BrosShopUsername)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BrosShopPassword)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BrosShopEmail)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BrosShopFullName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BrosShopRegistrationDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BrosShopPhoneNumber)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.BrosShopUsername)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BrosShopPassword)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BrosShopEmail)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BrosShopFullName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BrosShopRegistrationDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BrosShopPhoneNumber)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.BrosShopUserId">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.BrosShopUserId">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.BrosShopUserId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

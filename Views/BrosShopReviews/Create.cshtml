@@ -1,0 +1,46 @@
+﻿@model WebApp2.Models.BrosShopReview
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>BrosShopReview</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="BrosShopProductId" class="control-label"></label>
+                <select asp-for="BrosShopProductId" class ="form-control" asp-items="ViewBag.BrosShopProductId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="BrosShopUserId" class="control-label"></label>
+                <select asp-for="BrosShopUserId" class ="form-control" asp-items="ViewBag.BrosShopUserId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="BrosShopRating" class="control-label"></label>
+                <input asp-for="BrosShopRating" class="form-control" />
+                <span asp-validation-for="BrosShopRating" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="BrosShopComment" class="control-label"></label>
+                <input asp-for="BrosShopComment" class="form-control" />
+                <span asp-validation-for="BrosShopComment" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

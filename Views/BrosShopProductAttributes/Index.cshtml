@@ -1,0 +1,53 @@
+﻿@model IEnumerable<WebApp2.Models.BrosShopProductAttribute>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.BrosShopCount)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BrosShopColor)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BrosShopSize)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BrosShopProduct)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.BrosShopCount)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BrosShopColor)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BrosShopSize)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BrosShopProduct.BrosShopProductId)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.BrosShopAttributesId">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.BrosShopAttributesId">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.BrosShopAttributesId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

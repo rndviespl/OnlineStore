@@ -1,0 +1,51 @@
+﻿@model WebApp2.Models.BrosShopReview
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h1>Delete</h1>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>BrosShopReview</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.BrosShopRating)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.BrosShopRating)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.BrosShopComment)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.BrosShopComment)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.BrosShopDateTime)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.BrosShopDateTime)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.BrosShopProduct)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.BrosShopProduct.BrosShopProductId)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.BrosShopUser)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.BrosShopUser.BrosShopUserId)
+        </dd>
+    </dl>
+    
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="BrosShopReviewId" />
+        <input type="submit" value="Delete" class="btn btn-danger" /> |
+        <a asp-action="Index">Back to List</a>
+    </form>
+</div>

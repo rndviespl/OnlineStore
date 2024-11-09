@@ -206,6 +206,7 @@ PublishScripts/
 *.nuget.props
 *.nuget.targets
 
+
 # Microsoft Azure Build Output
 csx/
 *.build.csdef
@@ -223,6 +224,7 @@ _pkginfo.txt
 *.appxbundle
 *.appxupload
 
+
 # Visual Studio cache files
 # files ending in .cache can be ignored
 *.[Cc]ache
@@ -239,6 +241,14 @@ ClientBin/
 *.pfx
 *.publishsettings
 orleans.codegen.cs
+
+# Папки сборки
+bin/
+obj/
+
+# Конфигурационные файлы
+appsettings.json
+*.config
 
 # Including strong name files can present a security risk
 # (https://github.com/github/gitignore/pull/2483#issue-259490424)

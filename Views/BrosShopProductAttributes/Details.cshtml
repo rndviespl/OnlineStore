@@ -1,0 +1,42 @@
+﻿@model WebApp2.Models.BrosShopProductAttribute
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>BrosShopProductAttribute</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.BrosShopCount)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.BrosShopCount)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.BrosShopColor)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.BrosShopColor)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.BrosShopSize)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.BrosShopSize)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.BrosShopProduct)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.BrosShopProduct.BrosShopProductId)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.BrosShopAttributesId">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
