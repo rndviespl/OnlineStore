@@ -3,3 +3,8 @@
 ################################################################################
 
 /.vs/WebApp2/FileContentIndex/0809998f-46ec-4f79-a008-632a3dbecf9e.vsidx
+/.vs/WebApp2
+/bin/Debug/net8.0
+/.vs/ProjectEvaluation
+/obj
+*.user
