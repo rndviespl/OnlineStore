@@ -13,8 +13,8 @@ namespace WebApp2
             builder.Services.AddDbContext<ApplicationContext>((serviceProvider, options) =>
             {
                 var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-                var connectionStringg = configuration.GetConnectionString("Default");
-                options.UseMySql(connectionStringg, Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.39-mysql"));
+                var connectionString = configuration.GetConnectionString("Default");
+                options.UseMySql(connectionString, Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.39-mysql"));
             });
             // Add services to the container.
             builder.Services.AddControllersWithViews();
