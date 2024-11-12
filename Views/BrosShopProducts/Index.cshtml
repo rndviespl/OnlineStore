@@ -4,68 +4,43 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Каталог товаров</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">создать товар</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.BrosShopPrice)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.BrosShopTitle)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.BrosShopDiscountPercent)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.BrosShopWbarticul)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.BrosShopDescription)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.BrosShopPurcharesePrice)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.BrosShopCategory)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.BrosShopPrice)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.BrosShopTitle)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.BrosShopDiscountPercent)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.BrosShopWbarticul)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.BrosShopDescription)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.BrosShopPurcharesePrice)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.BrosShopCategory.BrosShopCategoryId)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.BrosShopProductId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.BrosShopProductId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.BrosShopProductId">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+
+<div class="row">
+    @foreach (var item in Model)
+    {
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                <div class="row no-gutters">
+                    <div class="col-md-6">
+                        @*  <img src="@item.BrosShopImageUrl" class="card-img" alt="@item.BrosShopTitle" />*@
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card-body">
+                            <h5 class="card-title">@Html.DisplayFor(modelItem => item.BrosShopTitle)</h5>
+                            <p class="card-text">
+                                <strong>Price:</strong> @Html.DisplayFor(modelItem => item.BrosShopPrice) <br />
+                                <strong>Discount:</strong> @Html.DisplayFor(modelItem => item.BrosShopDiscountPercent)% <br />
+                                <strong>Article:</strong> @Html.DisplayFor(modelItem => item.BrosShopWbarticul) <br />
+                                <strong>Description:</strong> @Html.DisplayFor(modelItem => item.BrosShopDescription) <br />
+                                <strong>Purchase Price:</strong> @Html.DisplayFor(modelItem => item.BrosShopPurcharesePrice) <br />
+                                <strong>Category ID:</strong> @Html.DisplayFor(modelItem => item.BrosShopCategory.BrosShopCategoryId)
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="btn-group">
+                                    <a asp-action="Edit" asp-route-id="@item.BrosShopProductId" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                    <a asp-action="Details" asp-route-id="@item.BrosShopProductId" class="btn btn-sm btn-outline-secondary">Details</a>
+                                    <a asp-action="Delete" asp-route-id="@item.BrosShopProductId" class="btn btn-sm btn-outline-danger">Delete</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
