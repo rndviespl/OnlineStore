@@ -10,3 +10,4 @@
 /obj
 *.user
 /.vs/OnlineStore/v17/.wsuo
+/Controllers/BrosShopImagesController.cs
