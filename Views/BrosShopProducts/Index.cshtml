@@ -17,7 +17,22 @@
             <div class="card mb-4 shadow-sm">
                 <div class="row no-gutters">
                     <div class="col-md-6">
-                        @*  <img src="@item.BrosShopImageUrl" class="card-img" alt="@item.BrosShopTitle" />*@
+                        <h4>Images</h4>
+                        <div class="row">
+                            @if (item.BrosShopImages != null && item.BrosShopImages.Any())
+                            {
+                                foreach (var imageInCollection in item.BrosShopImages)
+                                {
+                                    <div class="col-md-6 mb-2">
+                                        <img src="@Url.Action("GetImage", "BrosShopImages", new { imageId = imageInCollection.BrosShopImagesId })" class="img-fluid" alt="Image for @item.BrosShopTitle" />
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <p>No images available for this product.</p>
+                            }
+                        </div>
                     </div>
                     <div class="col-md-6">
                         <div class="card-body">
