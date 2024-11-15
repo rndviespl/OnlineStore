@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using WebApp2.Controllers;
 using WebApp2.Data;
 
 namespace WebApp2
@@ -16,6 +17,7 @@ namespace WebApp2
                 var connectionString = configuration.GetConnectionString("Default");
                 options.UseMySql(connectionString, Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.39-mysql"));
             });
+            builder.Services.AddHttpClient<BrosShopImagesController>();
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
