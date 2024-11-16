@@ -11,3 +11,7 @@
 *.user
 /.vs/OnlineStore/v17/.wsuo
 /Controllers/BrosShopImagesController.cs
+/Data/ApplicationContext.cs
+/Models/BrosShopOrder.cs
+/Models/BrosShopProduct.cs
+/.gitignore
