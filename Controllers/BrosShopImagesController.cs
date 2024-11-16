@@ -60,5 +60,40 @@ namespace WebApp2.Controllers
 
             return NotFound(); // Если запрос к API не успешен, возвращаем 404
         }
+
+        // GET: BrosShopImages/GetImage/{productId}
+        [HttpGet]
+        public async Task<IActionResult> GetImageForProductId(int productId)
+        {
+            // Получаем продукт по его идентификатору, включая связанные изображения
+            var product = await _context.BrosShopProducts
+                .Include(p => p.BrosShopImages) // Включаем изображения, связанные с продуктом
+                .FirstOrDefaultAsync(p => p.BrosShopProductId == productId);
+
+            if (product == null || product.BrosShopImages == null || !product.BrosShopImages.Any())
+            {
+                return NotFound(); // Если продукт или изображения не найдены, возвращаем 404
+            }
+
+            // Получаем первое изображение
+            var image = product.BrosShopImages.First();
+
+            // Шаг 2: Получаем BaseUrl из конфигурации
+            var baseUrl = _configuration["ApiSettings:BaseUrl"];
+
+            // Шаг 3: Конструируем полный URL API
+            var apiUrl = $"{baseUrl}{image.BrosShopImagesId}";
+
+            // Получаем изображение из API
+            var response = await _httpClient.GetAsync(apiUrl);
+            if (response.IsSuccessStatusCode)
+            {
+                var imageBytes = await response.Content.ReadAsByteArrayAsync();
+                return File(imageBytes, "image/jpeg"); // Возвращаем изображение с правильным MIME-типом
+            }
+
+            return NotFound(); // Если запрос к API не успешен, возвращаем 404
+        }
+
     }
 }
