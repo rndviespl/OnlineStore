@@ -1,127 +1,22 @@
 html {
-    font-size: 14px;
+  font-size: 14px;
 }
 
 @media (min-width: 768px) {
-    html {
-        font-size: 16px;
-    }
+  html {
+    font-size: 16px;
+  }
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 html {
-    position: relative;
-    min-height: 100%;
+  position: relative;
+  min-height: 100%;
 }
 
 body {
-    margin-bottom: 60px;
-    font-family: Arial, sans-serif; /* Задаем шрифт для всего сайта */
-    background-color: #f8f9fa; /* Светлый фон для всего сайта */
-    color: #000; /* Черный цвет текста для лучшей читаемости */
-}
-
-h1, h2, h3, h4, h5, h6 {
-    color: #000; /* Черный цвет заголовков */
-    margin-bottom: 1rem; /* Отступ снизу для заголовков */
-}
-
-.fixed-image-container {
-    width: 100%; /* Ширина контейнера 100% */
-    height: 200px; /* Фиксированная высота контейнера */
-    overflow: hidden; /* Скрывает любые части изображения, выходящие за пределы контейнера */
-    position: relative; /* Устанавливает контекст для абсолютного позиционирования */
-}
-
-.fixed-image {
-    width: 100%; /* Ширина изображения 100% */
-    height: 100%; /* Высота изображения равна высоте контейнера */
-    object-fit: contain; /* Обеспечивает, что изображение полностью помещается в контейнер */
-    object-position: center; /* Центрирует изображение внутри контейнера */
-}
-
-p {
-    line-height: 1.5; /* Увеличиваем межстрочный интервал для лучшей читаемости */
-}
-
-.card {
-    border: 1px solid #ddd; /* Светлая граница для карточек */
-    border-radius: 0.5rem; /* Закругленные углы */
-    transition: transform 0.2s; /* Плавный переход при наведении */
-    height: 350px; /* Фиксированная высота карточки */
-}
-
-    .card img {
-        width: 100%; /* Ширина изображения 100% */
-        height: 200px; /* Фиксированная высота изображения */
-        object-fit: cover; /* Обеспечивает обрезку изображения, чтобы оно заполнило контейнер */
-    }
-
-    .card .card-body {
-        color: #000; /* Черный цвет текста внутри карточки */
-        height: calc(100% - 200px); /* Высота тела карточки, чтобы заполнить оставшееся пространство */
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between; /* Выравнивание содержимого */
-    }
-
-    .card:hover {
-        transform: scale(1.05); /* Увеличение карточки при наведении */
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Тень при наведении */
-    }
-.card-text {
-    margin: 0; /* Убираем отступы */
-}
-
-.description-text {
-    display: -webkit-box; /* Используем флекс-контейнер для многострочного текста */
-    -webkit-line-clamp: 5; /* Ограничиваем количество строк до 5 */
-    -webkit-box-orient: vertical; /* Устанавливаем ориентацию флекс-контейнера */
-    overflow: hidden; /* Скрываем переполнение */
-    text-overflow: ellipsis; /* Добавляем многоточие, если текст не помещается */
-    line-height: 1.5; /* Устанавливаем межстрочный интервал для лучшей читаемости */
-    max-height: 7.5em; /* Ограничиваем высоту (5 строки * 1.5em) */
-}
-
-
-
-
-.btn {
-    border-radius: 0.25rem; /* Закругленные углы для кнопок */
-    transition: background-color 0.3s, color 0.3s; /* Плавный переход для фона и цвета текста */
-}
-
-.btn-primary {
-    background-color: #258cfb; /* Основной цвет кнопок */
-    color: white; /* Цвет текста на кнопках */
-}
-
-    .btn-primary:hover {
-        background-color: #1a6bbd; /* Темный цвет при наведении */
-        color: white; /* Цвет текста при наведении */
-    }
-
-.form-control {
-    border-radius: 0.25rem; /* Закругленные углы для полей ввода */
-    border: 1px solid #ccc; /* Светлая граница */
-}
-
-    .form-control:focus {
-        border-color: #258cfb; /* Цвет границы при фокусе */
-        box-shadow: 0 0 0 0.2rem rgba(37, 140, 251, 0.25); /* Тень при фокусе */
-    }
-
-h1, h2, h3, h4, h5, h6 {
-    color: #000; /* Черный цвет заголовков */
-    margin-bottom: 1rem; /* Отступ снизу для заголовков */
-}
-
-
-@media (max-width: 576px) {
-    .card {
-        margin-bottom: 1rem; /* Отступ между карточками на мобильных устройствах */
-    }
+  margin-bottom: 60px;
 }
