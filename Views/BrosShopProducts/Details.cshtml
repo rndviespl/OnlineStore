@@ -17,14 +17,19 @@
 <div class="row">
     <div class="col-md-6">
         <h4>Images</h4>
-        <div id="productCarousel" class="carousel slide" data-ride="carousel">
+        <div id="productCarousel" class="carousel slide carousel-fade" data-ride="carousel">
             <div class="carousel-inner">
                 @for (int i = 0; i < images.Count; i++)
                 {
                     var imageInCollection = images[i];
-                    <div class="carousel-item @(i == 0 ? "active" : "")">
-                        <img src="@Url.Action("GetImage", "BrosShopImages", new { imageId = imageInCollection.BrosShopImagesId })" class="d-block w-100 fixed-image" alt="Image for @Model.BrosShopTitle" />
-                    </div>
+                    if (imageInCollection != null) // Проверка на наличие изображения
+                    {
+                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                            <div class="fixed-image-container">
+                                <img src="@Url.Action("GetImage", "BrosShopImages", new { imageId = imageInCollection.BrosShopImagesId })" class="d-block w-100 fixed-image" alt="Image for @Model.BrosShopTitle" />
+                            </div>
+                        </div>
+                    }
                 }
             </div>
             <a class="carousel-control-prev" href="#productCarousel" role="button" data-slide="prev">
