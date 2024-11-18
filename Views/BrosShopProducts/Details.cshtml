@@ -2,59 +2,85 @@
 
 @{
     ViewData["Title"] = "Details";
+    var images = Model.BrosShopImages.ToList(); // Преобразуем в список
 }
 
-<h1>Details</h1>
+<!-- Подключение Bootstrap CSS -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
-<div>
-    <h4>BrosShopProduct</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.BrosShopPrice)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.BrosShopPrice)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.BrosShopTitle)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.BrosShopTitle)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.BrosShopDiscountPercent)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.BrosShopDiscountPercent)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.BrosShopWbarticul)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.BrosShopWbarticul)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.BrosShopDescription)
-        </dt>
-        <dd class = "col-sm-10">
+<!-- Подключение jQuery и Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+<h1>@Model.BrosShopTitle</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Images</h4>
+        <div id="productCarousel" class="carousel slide carousel-fade" data-ride="carousel">
+            <div class="carousel-inner">
+                @for (int i = 0; i < images.Count; i++)
+                {
+                    var imageInCollection = images[i];
+                    if (imageInCollection != null) // Проверка на наличие изображения
+                    {
+                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                            <div class="fixed-image-container">
+                                <img src="@Url.Action("GetImage", "BrosShopImages", new { imageId = imageInCollection.BrosShopImagesId })" class="d-block w-100 fixed-image" alt="Image for @Model.BrosShopTitle" />
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+            <a class="carousel-control-prev" href="#productCarousel" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only">Previous</span>
+            </a>
+            <a class="carousel-control-next" href="#productCarousel" role="button" data-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only">Next</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <h4>Product Details</h4>
+        <dl class="row">
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.BrosShopPrice)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.BrosShopPrice)
+            </dd>
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.BrosShopDiscountPercent)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.BrosShopDiscountPercent)
+            </dd>
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.BrosShopWbarticul)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.BrosShopWbarticul)
+            </dd>
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.BrosShopCategory)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.BrosShopCategory.BrosShopCategoryId)
+            </dd>
+        </dl>
+        <h4>Description</h4>
+        <p>
             @Html.DisplayFor(model => model.BrosShopDescription)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.BrosShopPurcharesePrice)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.BrosShopPurcharesePrice)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.BrosShopCategory)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.BrosShopCategory.BrosShopCategoryId)
-        </dd>
-    </dl>
+        </p>
+    </div>
 </div>
+
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.BrosShopProductId">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>
+
+

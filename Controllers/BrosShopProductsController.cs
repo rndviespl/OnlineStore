@@ -35,8 +35,10 @@ namespace WebApp2.Controllers
             }
 
             var brosShopProduct = await _context.BrosShopProducts
-                .Include(b => b.BrosShopCategory)
-                .FirstOrDefaultAsync(m => m.BrosShopProductId == id);
+            .Include(b => b.BrosShopCategory)
+            .Include(p => p.BrosShopImages) // Загружаем все изображения
+            .FirstOrDefaultAsync(m => m.BrosShopProductId == id);
+
             if (brosShopProduct == null)
             {
                 return NotFound();

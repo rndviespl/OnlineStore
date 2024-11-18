@@ -13,10 +13,14 @@ namespace WebApp2.Controllers
     public class BrosShopImagesController : Controller
     {
         private readonly ApplicationContext _context;
+        private readonly IConfiguration _configuration;
+        private readonly HttpClient _httpClient;
 
-        public BrosShopImagesController(ApplicationContext context)
+        public BrosShopImagesController(ApplicationContext context, IConfiguration configuration, HttpClient httpClient)
         {
             _context = context;
+            _configuration = configuration;
+            _httpClient = httpClient;
         }
 
         // GET: BrosShopImages
@@ -26,139 +30,70 @@ namespace WebApp2.Controllers
             return View(await applicationContext.ToListAsync());
         }
 
-        // GET: BrosShopImages/Details/5
-        public async Task<IActionResult> Details(int? id)
+        // GET: BrosShopImages/GetImage/{productId}
+        [HttpGet]
+        // Метод для получения изображения по ID изображения
+        public async Task<IActionResult> GetImage(int imageId)
         {
-            if (id == null)
+            // Получаем изображение по его идентификатору
+            var image = await _context.BrosShopImages
+                .FirstOrDefaultAsync(i => i.BrosShopImagesId == imageId); // Используем BrosShopImagesId
+
+            if (image == null)
             {
-                return NotFound();
+                return NotFound(); // Если изображение не найдено, возвращаем 404
             }
 
-            var brosShopImage = await _context.BrosShopImages
-                .Include(b => b.BrosShopProduct)
-                .FirstOrDefaultAsync(m => m.BrosShopImagesId == id);
-            if (brosShopImage == null)
+            // Шаг 2: Получаем BaseUrl из конфигурации
+            var baseUrl = _configuration["ApiSettings:BaseUrl"];
+
+            // Шаг 3: Конструируем полный URL API
+            var apiUrl = $"{baseUrl}{image.BrosShopImagesId}";
+
+            // Получаем изображение из API
+            var response = await _httpClient.GetAsync(apiUrl);
+            if (response.IsSuccessStatusCode)
             {
-                return NotFound();
+                var imageBytes = await response.Content.ReadAsByteArrayAsync();
+                return File(imageBytes, "image/jpeg"); // Возвращаем изображение с правильным MIME-типом
             }
 
-            return View(brosShopImage);
+            return NotFound(); // Если запрос к API не успешен, возвращаем 404
         }
 
-        // GET: BrosShopImages/Create
-        public IActionResult Create()
+        // GET: BrosShopImages/GetImage/{productId}
+        [HttpGet]
+        public async Task<IActionResult> GetImageForProductId(int productId)
         {
-            ViewData["BrosShopProductId"] = new SelectList(_context.BrosShopProducts, "BrosShopProductId", "BrosShopProductId");
-            return View();
+            // Получаем продукт по его идентификатору, включая связанные изображения
+            var product = await _context.BrosShopProducts
+                .Include(p => p.BrosShopImages) // Включаем изображения, связанные с продуктом
+                .FirstOrDefaultAsync(p => p.BrosShopProductId == productId);
+
+            if (product == null || product.BrosShopImages == null || !product.BrosShopImages.Any())
+            {
+                return NotFound(); // Если продукт или изображения не найдены, возвращаем 404
+            }
+
+            // Получаем первое изображение
+            var image = product.BrosShopImages.First();
+
+            // Шаг 2: Получаем BaseUrl из конфигурации
+            var baseUrl = _configuration["ApiSettings:BaseUrl"];
+
+            // Шаг 3: Конструируем полный URL API
+            var apiUrl = $"{baseUrl}{image.BrosShopImagesId}";
+
+            // Получаем изображение из API
+            var response = await _httpClient.GetAsync(apiUrl);
+            if (response.IsSuccessStatusCode)
+            {
+                var imageBytes = await response.Content.ReadAsByteArrayAsync();
+                return File(imageBytes, "image/jpeg"); // Возвращаем изображение с правильным MIME-типом
+            }
+
+            return NotFound(); // Если запрос к API не успешен, возвращаем 404
         }
 
-        // POST: BrosShopImages/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("BrosShopImagesId,BrosShopProductId,BrosShopImageTitle")] BrosShopImage brosShopImage)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(brosShopImage);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["BrosShopProductId"] = new SelectList(_context.BrosShopProducts, "BrosShopProductId", "BrosShopProductId", brosShopImage.BrosShopProductId);
-            return View(brosShopImage);
-        }
-
-        // GET: BrosShopImages/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var brosShopImage = await _context.BrosShopImages.FindAsync(id);
-            if (brosShopImage == null)
-            {
-                return NotFound();
-            }
-            ViewData["BrosShopProductId"] = new SelectList(_context.BrosShopProducts, "BrosShopProductId", "BrosShopProductId", brosShopImage.BrosShopProductId);
-            return View(brosShopImage);
-        }
-
-        // POST: BrosShopImages/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("BrosShopImagesId,BrosShopProductId,BrosShopImageTitle")] BrosShopImage brosShopImage)
-        {
-            if (id != brosShopImage.BrosShopImagesId)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(brosShopImage);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!BrosShopImageExists(brosShopImage.BrosShopImagesId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["BrosShopProductId"] = new SelectList(_context.BrosShopProducts, "BrosShopProductId", "BrosShopProductId", brosShopImage.BrosShopProductId);
-            return View(brosShopImage);
-        }
-
-        // GET: BrosShopImages/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var brosShopImage = await _context.BrosShopImages
-                .Include(b => b.BrosShopProduct)
-                .FirstOrDefaultAsync(m => m.BrosShopImagesId == id);
-            if (brosShopImage == null)
-            {
-                return NotFound();
-            }
-
-            return View(brosShopImage);
-        }
-
-        // POST: BrosShopImages/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var brosShopImage = await _context.BrosShopImages.FindAsync(id);
-            if (brosShopImage != null)
-            {
-                _context.BrosShopImages.Remove(brosShopImage);
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool BrosShopImageExists(int id)
-        {
-            return _context.BrosShopImages.Any(e => e.BrosShopImagesId == id);
-        }
     }
 }

@@ -14,33 +14,29 @@
     @foreach (var item in Model)
     {
         <div class="col-md-4">
-            <div class="card mb-4 shadow-sm">
-                <div class="row no-gutters">
-                    <div class="col-md-6">
-                        @*  <img src="@item.BrosShopImageUrl" class="card-img" alt="@item.BrosShopTitle" />*@
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card-body">
-                            <h5 class="card-title">@Html.DisplayFor(modelItem => item.BrosShopTitle)</h5>
-                            <p class="card-text">
-                                <strong>Price:</strong> @Html.DisplayFor(modelItem => item.BrosShopPrice) <br />
-                                <strong>Discount:</strong> @Html.DisplayFor(modelItem => item.BrosShopDiscountPercent)% <br />
-                                <strong>Article:</strong> @Html.DisplayFor(modelItem => item.BrosShopWbarticul) <br />
-                                <strong>Description:</strong> @Html.DisplayFor(modelItem => item.BrosShopDescription) <br />
-                                <strong>Purchase Price:</strong> @Html.DisplayFor(modelItem => item.BrosShopPurcharesePrice) <br />
-                                <strong>Category ID:</strong> @Html.DisplayFor(modelItem => item.BrosShopCategory.BrosShopCategoryId)
-                            </p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="btn-group">
-                                    <a asp-action="Edit" asp-route-id="@item.BrosShopProductId" class="btn btn-sm btn-outline-secondary">Edit</a>
-                                    <a asp-action="Details" asp-route-id="@item.BrosShopProductId" class="btn btn-sm btn-outline-secondary">Details</a>
-                                    <a asp-action="Delete" asp-route-id="@item.BrosShopProductId" class="btn btn-sm btn-outline-danger">Delete</a>
+            <a asp-action="Details" asp-route-id="@item.BrosShopProductId" class="text-decoration-none">
+                <div class="card mb-4 shadow-sm">
+                    <div class="row no-gutters">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="fixed-image-container">
+                                    <img src="@Url.Action("GetImageForProductId", "BrosShopImages", new { productId = item.BrosShopProductId })" class="fixed-image" alt="Image for @item.BrosShopTitle" />
                                 </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card-body">
+                                <h5 class="card-title">@Html.DisplayFor(modelItem => item.BrosShopTitle)</h5>
+                                <p><strong>Price:</strong> @Html.DisplayFor(modelItem => item.BrosShopPrice)</p>
+                                <p class="card-text">
+                                    <strong>Description:</strong>
+                                    <span class="description-text">@Html.DisplayFor(modelItem => item.BrosShopDescription)</span>
+                                </p>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </a>
         </div>
     }
 </div>
