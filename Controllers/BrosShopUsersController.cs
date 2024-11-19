@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebApp2.Data;
 using WebApp2.Models;
+using WebApp2.ViewModel;
 
 namespace WebApp2.Controllers
 {
@@ -152,6 +153,35 @@ namespace WebApp2.Controllers
         private bool BrosShopUserExists(int id)
         {
             return _context.BrosShopUsers.Any(e => e.BrosShopUserId == id);
+        }
+
+        // GET: BrosShopUsers/Login
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        // POST: BrosShopUsers/Login
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _context.BrosShopUsers
+                    .FirstOrDefaultAsync(u => u.BrosShopUsername == model.Username && u.BrosShopPassword == model.Password);
+
+                if (user != null)
+                {
+                    // Here you can set cookies or session for the user
+                    // For example, you can use Authentication
+                    // await HttpContext.SignInAsync(...);
+
+                    return RedirectToAction("Index", "BrosShopProducts"); // Redirect to the product catalog
+                }
+                ModelState.AddModelError(string.Empty, "Неверное имя пользователя или пароль.");
+            }
+            return View(model);
         }
     }
 }

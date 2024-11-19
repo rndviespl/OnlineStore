@@ -13,5 +13,7 @@ public partial class BrosShopOrder
 
     public string? BrosShopTypeOrder { get; set; }
 
+    public virtual ICollection<BrosShopOrderComposition> BrosShopOrderCompositions { get; set; } = new List<BrosShopOrderComposition>();
+
     public virtual BrosShopUser BrosShopUser { get; set; } = null!;
 }

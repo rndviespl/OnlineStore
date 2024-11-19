@@ -1,0 +1,51 @@
+﻿@model List<CartItem>
+
+@{
+    ViewData["Title"] = "Корзина";
+}
+
+<h2>Корзина</h2>
+
+@if (Model.Count == 0)
+{
+    <p>Ваша корзина пуста.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Товар</th>
+                <th>Количество</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>Товар @item.ProductId</td> <!-- Здесь можно добавить название товара -->
+                    <td>@item.Quantity</td>
+                    <td>
+                        <button class="btn btn-danger" onclick="removeFromCart(@item.ProductId)">Удалить</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <form asp-action="Checkout" method="post">
+        <input type="hidden" name="cartItems" value="@Html.Raw(Json.Serialize(Model))" />
+        <button type="submit" class="btn btn-primary">Оформить заказ</button>
+    </form>
+}
+
+@section Scripts {
+    <script>
+        function removeFromCart(productId) {
+            // Логика для удаления товара из корзины
+            // Например, обновление local storage или cookies
+            alert('Товар ' + productId + ' удален из корзины.');
+        }
+    </script>
+}
