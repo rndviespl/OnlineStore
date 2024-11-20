@@ -173,10 +173,6 @@ namespace WebApp2.Controllers
 
                 if (user != null)
                 {
-                    // Here you can set cookies or session for the user
-                    // For example, you can use Authentication
-                    // await HttpContext.SignInAsync(...);
-
                     return RedirectToAction("Index", "BrosShopProducts"); // Redirect to the product catalog
                 }
                 ModelState.AddModelError(string.Empty, "Неверное имя пользователя или пароль.");
