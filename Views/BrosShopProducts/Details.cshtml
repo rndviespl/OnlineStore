@@ -95,10 +95,10 @@
                         type: 'POST',
                         data: $(this).serialize(), // Сериализуем данные формы
                         success: function (response) {
-                            $('#message').text('Товар добавлен в корзину!').show(); // Показываем сообщение
+                            $('#message').text(response.message).show(); // Показываем сообщение
                         },
-                        error: function () {
-                            $('#message').text('Произошла ошибка при добавлении товара.').show(); // Показываем сообщение об ошибке
+                        error: function (xhr, status, error) {
+                            $('#message').text('Произошла ошибка при добавлении товара: ' + error).show(); // Показываем сообщение об ошибке
                         }
                     });
                 });

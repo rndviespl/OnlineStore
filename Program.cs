@@ -55,7 +55,7 @@ namespace WebApp2
                 pattern: "{controller=BrosShopProducts}/{action=Index}/{id?}");
             app.MapControllerRoute(
                            name: "cart",
-                           pattern: "{controller=Cart}/{action=Index}/{id?}");
+                           pattern: "{controller=BrosShopCart}/{action=Index}/{id?}");
             app.MapControllerRoute(
                name: "user",
                pattern: "{controller=BrosShopUser}/{action=Index}/{id?}");

@@ -36,16 +36,39 @@ else
 
     <form asp-action="Checkout" method="post">
         <input type="hidden" name="cartItems" value="@Html.Raw(Json.Serialize(Model))" />
-        <button type="submit" class="btn btn-primary">Оформить заказ</button>
+        <button type="submit" name="checkoutButton" class="btn btn-primary">Оформить заказ</button>
     </form>
 }
 
 @section Scripts {
     <script>
         function removeFromCart(productId) {
-            // Логика для удаления товара из корзины
-            // Например, обновление local storage или cookies
-            alert('Товар ' + productId + ' удален из корзины.');
+            console.log("Удаляем товар с ID:", productId); // Выводим ID товара
+            fetch('/BrosShopCart/RemoveFromCart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ productId: productId })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json(); // Получаем JSON-ответ
+                    } else {
+                        return response.json().then(data => {
+                            alert(data.message || 'Ошибка при удалении товара из корзины.');
+                        });
+                    }
+                })
+                .then(data => {
+                    if (data.success) {
+                        location.reload(); // Перезагружаем страницу, если удаление прошло успешно
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert('Ошибка при удалении товара из корзины.');
+                });
         }
     </script>
 }

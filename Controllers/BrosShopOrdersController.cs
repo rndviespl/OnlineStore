@@ -45,6 +45,76 @@ namespace WebApp2.Controllers
             return View(brosShopOrder);
         }
 
+
+        // POST: BrosShopOrders/Checkout
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Checkout(List<CartItem> cartItems)
+        {
+            if (cartItems == null || !cartItems.Any())
+            {
+                return RedirectToAction(nameof(Index)); // Перенаправление, если корзина пуста
+            }
+
+            // Создание нового заказа
+            var order = new BrosShopOrder
+            {
+                BrosShopUserId = 1/* Получите ID текущего пользователя */,
+                BrosShopDateTimeOrder = DateTime.Now,
+                BrosShopOrderCompositions = new List<BrosShopOrderComposition>()
+            };
+            string orderType = "веб-сайт"; // Установите значение по умолчанию
+            order.BrosShopTypeOrder = orderType;
+
+            // Добавление каждого товара из корзины в состав заказа
+            foreach (var item in cartItems)
+            {
+                var product = await _context.BrosShopProducts.FindAsync(item.ProductId);
+                if (product != null)
+                {
+                    var orderComposition = new BrosShopOrderComposition
+                    {
+                        BrosShopProductId = product.BrosShopProductId,
+                        BrosShopOrderId = order.BrosShopOrderId, // Это будет установлено после сохранения заказа
+                        BrosShopQuantity = (sbyte)item.Quantity,
+                        BrosShopCost = product.BrosShopPrice * item.Quantity // Рассчитываем стоимость
+                    };
+
+                    order.BrosShopOrderCompositions.Add(orderComposition);
+                }
+            }
+
+            // Добавление заказа в контекст и сохранение
+            _context.BrosShopOrders.Add(order);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index)); // Перенаправление на список заказов или страницу подтверждения
+        }
+
+        private decimal GetProductPrice(int productId)
+        {
+            try
+            {
+                // Ищем продукт по его ID в базе данных
+                var product = _context.BrosShopProducts.FirstOrDefault(i => i.BrosShopProductId == productId);
+                // Проверяем, найден ли продукт
+                if (product == null)
+                {
+                    return 0; // Возвращаем 0, если продукт не найден
+                }
+
+                // Возвращаем стоимость продукта
+                return product.BrosShopPrice;
+            }
+            catch (Exception ex)
+            {
+                // Возвращаем 0 в случае ошибки
+                return 0;
+            }
+        }
+
+
+
         // GET: BrosShopOrders/Create
         public IActionResult Create()
         {
