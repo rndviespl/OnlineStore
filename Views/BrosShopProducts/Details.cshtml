@@ -76,6 +76,34 @@
         <p>
             @Html.DisplayFor(model => model.BrosShopDescription)
         </p>
+         <!-- Форма для добавления товара в корзину -->
+        <form id="addToCartForm" asp-action="AddToCart" method="post">
+            <input type="hidden" name="productId" value="@Model.BrosShopProductId" />
+            <input type="number" name="quantity" value="1" min="1" class="form-control" style="width: 100px; display: inline-block;" />
+            <button type="submit" class="btn btn-primary">Добавить в корзину</button>
+        </form>
+        <div id="message" style="display:none;"></div>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                $('#addToCartForm').submit(function (event) {
+                    event.preventDefault(); // Отменяем стандартное поведение формы
+
+                    $.ajax({
+                        url: $(this).attr('action'), // URL для отправки данных
+                        type: 'POST',
+                        data: $(this).serialize(), // Сериализуем данные формы
+                        success: function (response) {
+                            $('#message').text(response.message).show(); // Показываем сообщение
+                        },
+                        error: function (xhr, status, error) {
+                            $('#message').text('Произошла ошибка при добавлении товара: ' + error).show(); // Показываем сообщение об ошибке
+                        }
+                    });
+                });
+            });
+        </script>
     </div>
 </div>
 

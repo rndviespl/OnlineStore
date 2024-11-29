@@ -1,8 +1,13 @@
 ﻿@model IEnumerable<WebApp2.Models.BrosShopProduct>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] = "Index";</title>
+     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/WebApp2.styles.css" asp-append-version="true" />
+</head>
 
-@{
-    ViewData["Title"] = "Index";
-}
 
 <h1>Каталог товаров</h1>
 
@@ -10,7 +15,8 @@
     <a asp-action="Create" class="btn btn-primary">создать товар</a>
 </p>
 
-<div class="row">
+<div class="row mb-4">
+    <!-- Добавлен класс mb-4 для отступа снизу -->
     @foreach (var item in Model)
     {
         <div class="col-md-4">
@@ -40,3 +46,6 @@
         </div>
     }
 </div>
+
+<!-- Добавьте дополнительный отступ, если необходимо -->
+<div class="mb-5"></div> <!-- Это может помочь создать дополнительное пространство перед футером -->
