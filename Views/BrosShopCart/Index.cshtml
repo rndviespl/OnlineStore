@@ -1,74 +1,57 @@
-﻿@model List<CartItem>
-
+﻿@model WebApp2.Models.CartViewModel
 @{
     ViewData["Title"] = "Корзина";
+    decimal totalAmount = 0; // Объявляем переменную для хранения общей суммы
 }
 
 <h2>Корзина</h2>
 
-@if (Model.Count == 0)
+@if (Model.CartItems.Count == 0)
 {
     <p>Ваша корзина пуста.</p>
 }
 else
 {
+    <h3>Содержимое вашей корзины:</h3>
     <table class="table">
         <thead>
             <tr>
                 <th>Товар</th>
+                <th>Цена за штуку</th>
                 <th>Количество</th>
-                <th>Действия</th>
+                <th>Цена за все</th>
+                <th>Действия</th> <!-- Новый столбец для действий -->
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model)
+            @foreach (var item in Model.CartItems)
             {
-                <tr>
-                    <td>Товар @item.ProductId</td> <!-- Здесь можно добавить название товара -->
-                    <td>@item.Quantity</td>
-                    <td>
-                        <button class="btn btn-danger" onclick="removeFromCart(@item.ProductId)">Удалить</button>
-                    </td>
-                </tr>
+                var product = Model.Products.FirstOrDefault(p => p.BrosShopProductId == item.ProductId); // Получаем продукт из списка
+                if (product != null)
+                {
+                    decimal itemTotalPrice = product.BrosShopPrice * item.Quantity; // Вычисляем общую цену для товара
+                    totalAmount += itemTotalPrice; // Добавляем к общей сумме
+                    <tr>
+                        <td>@product.BrosShopTitle</td>
+                        <td>@product.BrosShopPrice.ToString("C")</td>
+                        <td>@item.Quantity</td>
+                        <td>@itemTotalPrice.ToString("C")</td>
+                        <td>
+                            <form asp-action="RemoveFromCart" method="post" style="display:inline;">
+                                <input type="hidden" name="productId" value="@item.ProductId" />
+                                <button type="submit" class="btn btn-danger">Удалить</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
             }
         </tbody>
     </table>
 
+    <h4>Сумма к оплате: @totalAmount.ToString("C")</h4>
+
     <form asp-action="Checkout" method="post">
-        <input type="hidden" name="cartItems" value="@Html.Raw(Json.Serialize(Model))" />
+        <input type="hidden" name="cartItems" value="@Html.Raw(Json.Serialize(Model.CartItems))" />
         <button type="submit" name="checkoutButton" class="btn btn-primary">Оформить заказ</button>
     </form>
-}
-
-@section Scripts {
-    <script>
-        function removeFromCart(productId) {
-            console.log("Удаляем товар с ID:", productId); // Выводим ID товара
-            fetch('/BrosShopCart/RemoveFromCart', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ productId: productId })
-            })
-                .then(response => {
-                    if (response.ok) {
-                        return response.json(); // Получаем JSON-ответ
-                    } else {
-                        return response.json().then(data => {
-                            alert(data.message || 'Ошибка при удалении товара из корзины.');
-                        });
-                    }
-                })
-                .then(data => {
-                    if (data.success) {
-                        location.reload(); // Перезагружаем страницу, если удаление прошло успешно
-                    }
-                })
-                .catch(error => {
-                    console.error('Ошибка:', error);
-                    alert('Ошибка при удалении товара из корзины.');
-                });
-        }
-    </script>
 }
