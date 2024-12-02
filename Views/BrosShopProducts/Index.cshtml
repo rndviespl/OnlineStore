@@ -10,11 +10,6 @@
 
 
 <h1>Каталог товаров</h1>
-
-<p>
-    <a asp-action="Create" class="btn btn-primary">создать товар</a>
-</p>
-
 <div class="row mb-4">
     <!-- Добавлен класс mb-4 для отступа снизу -->
     @foreach (var item in Model)
@@ -33,9 +28,9 @@
                         <div class="col-md-6">
                             <div class="card-body">
                                 <h5 class="card-title">@Html.DisplayFor(modelItem => item.BrosShopTitle)</h5>
-                                <p><strong>Price:</strong> @Html.DisplayFor(modelItem => item.BrosShopPrice)</p>
+                                <p><strong>Цена:</strong> @Html.DisplayFor(modelItem => item.BrosShopPrice)</p>
                                 <p class="card-text">
-                                    <strong>Description:</strong>
+                                    <strong>Описание товара:</strong>
                                     <span class="description-text">@Html.DisplayFor(modelItem => item.BrosShopDescription)</span>
                                 </p>
                             </div>

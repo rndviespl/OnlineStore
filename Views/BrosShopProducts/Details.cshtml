@@ -16,7 +16,6 @@
 
 <div class="row">
     <div class="col-md-6">
-        <h4>Images</h4>
         <div id="productCarousel" class="carousel slide carousel-fade" data-ride="carousel">
             <div class="carousel-inner">
                 @for (int i = 0; i < images.Count; i++)
@@ -45,41 +44,44 @@
 
 
     <div class="col-md-6">
-        <h4>Детали товара</h4>
-        <dl class="row">
-            <dt class="col-sm-4">
-                @Html.DisplayNameFor(model => model.BrosShopPrice)
-            </dt>
-            <dd class="col-sm-8">
-                @Html.DisplayFor(model => model.BrosShopPrice)
-            </dd>
-            <dt class="col-sm-4">
-                @Html.DisplayNameFor(model => model.BrosShopDiscountPercent)
-            </dt>
-            <dd class="col-sm-8">
-                @Html.DisplayFor(model => model.BrosShopDiscountPercent)
-            </dd>
-            <dt class="col-sm-4">
-                @Html.DisplayNameFor(model => model.BrosShopWbarticul)
-            </dt>
-            <dd class="col-sm-8">
-                @Html.DisplayFor(model => model.BrosShopWbarticul)
-            </dd>
-            <dt class="col-sm-4">
-                @Html.DisplayNameFor(model => model.BrosShopCategory)
-            </dt>
-            <dd class="col-sm-8">
-                @Html.DisplayFor(model => model.BrosShopCategory.BrosShopCategoryId)
-            </dd>
-        </dl>
-        <h4>Description</h4>
-        <p>
-            @Html.DisplayFor(model => model.BrosShopDescription)
-        </p>
+        <div class="col-md-8">
+            <!-- Измените на col-md-8 или col-md-12 -->
+            <h4>Детали товара</h4>
+            <dl class="row">
+                <dt class="col-sm-4 mb-2">
+                    <strong>Цена:</strong>
+                </dt>
+                <dd class="col-sm-8 mb-2">
+                    @Html.DisplayFor(model => model.BrosShopPrice)
+                </dd>
+                <dt class="col-sm-4 mb-2">
+                    <strong>Скидка (%):</strong>
+                </dt>
+                <dd class="col-sm-8 mb-2">
+                    @Html.DisplayFor(model => model.BrosShopDiscountPercent)
+                </dd>
+                <dt class="col-sm-4 mb-2">
+                    <strong>Артикул:</strong>
+                </dt>
+                <dd class="col-sm-8 mb-2">
+                    @Html.DisplayFor(model => model.BrosShopWbarticul)
+                </dd>
+                <dt class="col-sm-4 mb-2">
+                    <strong>Категория:</strong>
+                </dt>
+                <dd class="col-sm-8 mb-2">
+                    @Html.DisplayFor(model => model.BrosShopCategory.BrosShopCategoryId)
+                </dd>
+            </dl>
+            <h4>Описание</h4>
+            <p>
+                @Html.DisplayFor(model => model.BrosShopDescription)
+            </p>
+        </div>
          <!-- Форма для добавления товара в корзину -->
         <form id="addToCartForm" asp-action="AddToCart" method="post">
             <input type="hidden" name="productId" value="@Model.BrosShopProductId" />
-            <input type="number" name="quantity" value="1" min="1" class="form-control" style="width: 100px; display: inline-block;" />
+            <input type="number" name="quantity" value="1" min="1" max="254" step="1" class="form-control" style="width: 100px; display: inline-block;" />
             <button type="submit" class="btn btn-primary">Добавить в корзину</button>
         </form>
         <div id="message" style="display:none;"></div>
@@ -107,9 +109,5 @@
     </div>
 </div>
 
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.BrosShopProductId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
 
 
