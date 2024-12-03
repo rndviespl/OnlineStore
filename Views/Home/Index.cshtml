@@ -1,8 +1,18 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Главная страница";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<h1>Добро пожаловать на главную страницу!</h1>
+
+@if (ViewBag.Username != null)
+{
+    <p>Вы вошли как: @ViewBag.Username</p>
+    <form asp-controller="Account" asp-action="Logout" method="post">
+        <button type="submit">Выйти</button>
+    </form>
+}
+else
+{
+    <p>Вы не авторизованы.</p>
+    <a asp-controller="Account" asp-action="Login">Войти</a>
+}

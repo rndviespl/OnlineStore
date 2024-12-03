@@ -1,0 +1,16 @@
+﻿@using WebApp2.Models;
+
+@model UserDto
+
+<h2>Вход</h2>
+
+<form method="post" asp-controller="Account" asp-action="Login">
+    <input _ngcontent-ma-c1241423976="" type="text" placeholder="Username:" value="" name="userName">
+    <input _ngcontent-ma-c1241423976="" type="password" placeholder="Password:" value="" name="password">
+
+    <button _ngcontent-ma-c1241423976="" type="submit">Войти</button>
+
+    <p>
+        <a href="@Url.Action("Register", "Account")">Зарегистрироваться</a>
+    </p>
+</form>

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ProjWebApp.Models;
 using System.Diagnostics;
+using System.IdentityModel.Tokens.Jwt;
 using WebApp2.Models;
 
 namespace WebApp2.Controllers
@@ -16,6 +17,17 @@ namespace WebApp2.Controllers
 
         public IActionResult Index()
         {
+            var token = HttpContext.Request.Cookies["Token"];
+            string username = null;
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var jwtToken = handler.ReadJwtToken(token);
+                username = jwtToken.Claims.FirstOrDefault(c => c.Type == "sub")?.Value; // "sub" - это стандартное им€ дл€ идентификатора пользовател€
+            }
+
+            ViewBag.Username = username; // ѕередаем им€ пользовател€ в представление
             return View();
         }
 

@@ -12,7 +12,20 @@ namespace WebApp2
     {
         public static void Main(string[] args)
         {
+            IConfiguration _configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            var apiString = _configuration["ApiSettings:AuthUrl"];
+           
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddHttpClient<AuthService>(client =>
+            {
+                client.BaseAddress = new Uri(apiString); // Укажите базовый адрес вашего API
+            });
+            builder.Services.AddHttpClient<BrosShopImagesController>();
 
             // Регистрация ApplicationContext с зависимостями
             builder.Services.AddDbContext<ApplicationContext>((serviceProvider, options) =>
@@ -21,10 +34,15 @@ namespace WebApp2
                 var connectionString = configuration.GetConnectionString("Default");
                 options.UseMySql(connectionString, Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.39-mysql"));
             });
-            builder.Services.AddHttpClient<BrosShopImagesController>();
 
-           
             builder.Services.AddControllersWithViews();
+
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30); // Установите время ожидания
+                options.Cookie.HttpOnly = true; // Защитите куки
+                options.Cookie.IsEssential = true; // Сделайте куки обязательными
+            });
 
             var app = builder.Build();
 
@@ -41,6 +59,8 @@ namespace WebApp2
 
             app.UseRouting();
 
+            app.UseSession();
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(

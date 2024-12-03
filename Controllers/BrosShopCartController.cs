@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using WebApp2.Data;
+using NuGet.Common;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace WebApp2.Controllers
 {
@@ -14,10 +18,12 @@ namespace WebApp2.Controllers
     {
         private const string CartCookieKey = "Cart";
         private readonly ApplicationContext _context;
+        private readonly IConfiguration _configuration;
 
-        public BrosShopCartController(ApplicationContext context)
+        public BrosShopCartController(ApplicationContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         public async Task<IActionResult> Index()
@@ -71,10 +77,37 @@ namespace WebApp2.Controllers
             {
                 return Json(new { success = false, message = "Корзина пуста." });
             }
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = Request.Cookies["Token"];
+            //var userId = jwtToken.Claims.First(claim => claim.Type == "id").Value;
+            var secretKey = _configuration["ApiSettings:SecretKey"];
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+            var tokenHandler = new JwtSecurityTokenHandler();
+
+            var principal = tokenHandler.ValidateToken(jwtToken, new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = key,
+                ValidateIssuer = false, // Установите в true, если хотите проверять издателя
+                ValidateAudience = false, // Установите в true, если хотите проверять аудиторию
+                ClockSkew = TimeSpan.Zero // Установите в 0, если хотите отключить временной запас
+            }, out var validatedToken);
+
+            // Получаем ID пользователя из токена
+            var userIdClaim = principal.FindFirst("id");
+            if (userIdClaim == null)
+            {
+                return Json(new { success = false, message = "ID пользователя не найден в токене." });
+            }
+            var userId = userIdClaim.Value;
+
+
+            Console.WriteLine(userId);
+            Console.WriteLine(jwtToken);
 
             var brosShopOrder = new BrosShopOrder
             {
-                BrosShopUserId = 1, // Замените на фактический ID пользователя
+                BrosShopUserId = Int32.Parse(userId), // Замените на фактический ID пользователя
                 BrosShopDateTimeOrder = DateTime.UtcNow,
                 BrosShopTypeOrder = "веб-сайт",
                 BrosShopOrderCompositions = new List<BrosShopOrderComposition>()
