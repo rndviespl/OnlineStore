@@ -25,6 +25,8 @@ public partial class BrosShopProduct
 
     public virtual ICollection<BrosShopImage> BrosShopImages { get; set; } = new List<BrosShopImage>();
 
+    public virtual BrosShopOrderComposition? BrosShopOrderComposition { get; set; }
+
     public virtual ICollection<BrosShopProductAttribute> BrosShopProductAttributes { get; set; } = new List<BrosShopProductAttribute>();
 
     public virtual ICollection<BrosShopReview> BrosShopReviews { get; set; } = new List<BrosShopReview>();

@@ -30,7 +30,6 @@ namespace WebApp2.Controllers
             return View(await applicationContext.ToListAsync());
         }
 
-        // GET: BrosShopImages/GetImage/{productId}
         [HttpGet]
         // Метод для получения изображения по ID изображения
         public async Task<IActionResult> GetImage(int imageId)
@@ -50,12 +49,15 @@ namespace WebApp2.Controllers
             // Шаг 3: Конструируем полный URL API
             var apiUrl = $"{baseUrl}{image.BrosShopImagesId}";
 
-            // Получаем изображение из API
-            var response = await _httpClient.GetAsync(apiUrl);
-            if (response.IsSuccessStatusCode)
+            //Получаем изображение из API
+            using (var localhttp = _httpClient)
             {
-                var imageBytes = await response.Content.ReadAsByteArrayAsync();
-                return File(imageBytes, "image/jpeg"); // Возвращаем изображение с правильным MIME-типом
+                var response = await localhttp.GetAsync(apiUrl);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return File(await response.Content.ReadAsStreamAsync(), "image/jpeg"); // Возвращаем изображение с правильным MIME-типом
+                }
             }
 
             return NotFound(); // Если запрос к API не успешен, возвращаем 404
@@ -85,11 +87,15 @@ namespace WebApp2.Controllers
             var apiUrl = $"{baseUrl}{image.BrosShopImagesId}";
 
             // Получаем изображение из API
-            var response = await _httpClient.GetAsync(apiUrl);
-            if (response.IsSuccessStatusCode)
+
+            using (var localhttp = _httpClient)
             {
-                var imageBytes = await response.Content.ReadAsByteArrayAsync();
-                return File(imageBytes, "image/jpeg"); // Возвращаем изображение с правильным MIME-типом
+                var response = await localhttp.GetAsync(apiUrl);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return File(await response.Content.ReadAsStreamAsync(), "image/jpeg"); // Возвращаем изображение с правильным MIME-типом
+                }
             }
 
             return NotFound(); // Если запрос к API не успешен, возвращаем 404
