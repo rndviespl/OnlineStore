@@ -7,6 +7,11 @@ using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using WebApp2.Data;
+using NuGet.Common;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.Security.Claims;
 
 namespace WebApp2.Controllers
 {
@@ -14,10 +19,12 @@ namespace WebApp2.Controllers
     {
         private const string CartCookieKey = "Cart";
         private readonly ApplicationContext _context;
+        private readonly IConfiguration _configuration;
 
-        public BrosShopCartController(ApplicationContext context)
+        public BrosShopCartController(ApplicationContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         public async Task<IActionResult> Index()
@@ -71,10 +78,45 @@ namespace WebApp2.Controllers
             {
                 return Json(new { success = false, message = "Корзина пуста." });
             }
+            var jwtToken = Request.Cookies["Token"];
+            var secretKey = _configuration["ApiSettings:SecretKey"];
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+            var tokenHandler = new JwtSecurityTokenHandler();
+
+            var principal = tokenHandler.ValidateToken(jwtToken, new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = key,
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ClockSkew = TimeSpan.Zero
+            }, out var validatedToken);
+            var claimsIdentity = principal.Identity as ClaimsIdentity;
+            if (claimsIdentity != null)
+            {
+                foreach (var claim in claimsIdentity.Claims)
+                {
+                    Console.WriteLine($"Claim Type: {claim.Type}, Claim Value: {claim.Value}");
+                }
+            }
+            // Получаем username из токена
+            var usernameClaim = principal.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+            if (usernameClaim == null)
+            {
+                return Json(new { success = false, message = "Username не найден в токене." });
+            }
+            var username = usernameClaim.Value;
+
+            // Находим пользователя по username
+            var user = await _context.BrosShopUsers.FirstOrDefaultAsync(u => u.BrosShopUsername== username);
+            if (user == null)
+            {
+                return Json(new { success = false, message = "Пользователь не найден." });
+            }
 
             var brosShopOrder = new BrosShopOrder
             {
-                BrosShopUserId = 1, // Замените на фактический ID пользователя
+                BrosShopUserId = user.BrosShopUserId, // Замените на фактический ID пользователя
                 BrosShopDateTimeOrder = DateTime.UtcNow,
                 BrosShopTypeOrder = "веб-сайт",
                 BrosShopOrderCompositions = new List<BrosShopOrderComposition>()
