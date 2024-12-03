@@ -1,15 +1,19 @@
 ﻿@using WebApp2.Models;
 
 @model UserDto
+<!-- Вставьте это в <head> вашего _Layout.cshtml -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
 <h2>Вход</h2>
 
-<form method="post" asp-controller="Account" asp-action="Login">
-    <input _ngcontent-ma-c1241423976="" type="text" placeholder="Username:" value="" name="userName">
-    <input _ngcontent-ma-c1241423976="" type="password" placeholder="Password:" value="" name="password">
-
-    <button _ngcontent-ma-c1241423976="" type="submit">Войти</button>
-
+<form method="post" asp-controller="Account" asp-action="Login" class="form-group">
+    <div class="form-group">
+        <input type="text" class="form-control" placeholder="Username:" name="userName" required>
+    </div>
+    <div class="form-group">
+        <input type="password" class="form-control" placeholder="Password:" name="password" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Войти</button>
     <p>
         <a href="@Url.Action("Register", "Account")">Зарегистрироваться</a>
     </p>

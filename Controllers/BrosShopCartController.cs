@@ -11,6 +11,7 @@ using NuGet.Common;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Security.Claims;
 
 namespace WebApp2.Controllers
 {
@@ -77,9 +78,7 @@ namespace WebApp2.Controllers
             {
                 return Json(new { success = false, message = "Корзина пуста." });
             }
-            var handler = new JwtSecurityTokenHandler();
             var jwtToken = Request.Cookies["Token"];
-            //var userId = jwtToken.Claims.First(claim => claim.Type == "id").Value;
             var secretKey = _configuration["ApiSettings:SecretKey"];
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -88,26 +87,36 @@ namespace WebApp2.Controllers
             {
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = key,
-                ValidateIssuer = false, // Установите в true, если хотите проверять издателя
-                ValidateAudience = false, // Установите в true, если хотите проверять аудиторию
-                ClockSkew = TimeSpan.Zero // Установите в 0, если хотите отключить временной запас
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ClockSkew = TimeSpan.Zero
             }, out var validatedToken);
-
-            // Получаем ID пользователя из токена
-            var userIdClaim = principal.FindFirst("id");
-            if (userIdClaim == null)
+            var claimsIdentity = principal.Identity as ClaimsIdentity;
+            if (claimsIdentity != null)
             {
-                return Json(new { success = false, message = "ID пользователя не найден в токене." });
+                foreach (var claim in claimsIdentity.Claims)
+                {
+                    Console.WriteLine($"Claim Type: {claim.Type}, Claim Value: {claim.Value}");
+                }
             }
-            var userId = userIdClaim.Value;
+            // Получаем username из токена
+            var usernameClaim = principal.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+            if (usernameClaim == null)
+            {
+                return Json(new { success = false, message = "Username не найден в токене." });
+            }
+            var username = usernameClaim.Value;
 
-
-            Console.WriteLine(userId);
-            Console.WriteLine(jwtToken);
+            // Находим пользователя по username
+            var user = await _context.BrosShopUsers.FirstOrDefaultAsync(u => u.BrosShopUsername== username);
+            if (user == null)
+            {
+                return Json(new { success = false, message = "Пользователь не найден." });
+            }
 
             var brosShopOrder = new BrosShopOrder
             {
-                BrosShopUserId = Int32.Parse(userId), // Замените на фактический ID пользователя
+                BrosShopUserId = user.BrosShopUserId, // Замените на фактический ID пользователя
                 BrosShopDateTimeOrder = DateTime.UtcNow,
                 BrosShopTypeOrder = "веб-сайт",
                 BrosShopOrderCompositions = new List<BrosShopOrderComposition>()
