@@ -61,15 +61,15 @@ namespace WebApp2
             app.UseAuthorization();
 
             app.MapControllerRoute(
+                name: "product",
+                pattern: "{controller=BrosShopProducts}/{action=Index}/{id?}");
+            app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
             app.MapControllerRoute(
                  name: "login",
                  pattern: "BrosShopUsers/Login",
                  defaults: new { controller = "BrosShopUsers", action = "Login" });
-            app.MapControllerRoute(
-                name: "product",
-                pattern: "{controller=BrosShopProducts}/{action=Index}/{id?}");
             app.MapControllerRoute(
                            name: "cart",
                            pattern: "{controller=BrosShopCart}/{action=Index}/{id?}");

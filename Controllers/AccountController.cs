@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
 using WebApp2.Data;
 using WebApp2.Models;
 
@@ -76,7 +77,21 @@ namespace WebApp2.Controllers
         public IActionResult Logout()
         {
             HttpContext.Response.Cookies.Delete("Token");
-            return RedirectToAction("Index", "Home");
+            HttpContext.Response.Cookies.Delete("Cart");
+
+            // Обновляем ViewBag.Username после выхода
+            var token = HttpContext.Request.Cookies["Token"];
+            string username = null;
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var jwtToken = handler.ReadJwtToken(token);
+                username = jwtToken.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            }
+
+            ViewBag.Username = username; // Обновляем ViewBag.Username
+            return RedirectToAction("Index", "BrosShopProducts");
         }
 
     }
