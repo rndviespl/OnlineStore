@@ -21,7 +21,13 @@
                         <div class="col-md-6">
                             <div class="row">
                                 <div class="fixed-image-container">
-                                    <img src="@Url.Action("GetImageForProductId", "BrosShopImages", new { productId = item.BrosShopProductId })" class="fixed-image" alt="Image for @item.BrosShopTitle" />
+                                    @{
+                                        // Получаем URL изображения товара
+                                        var imageUrl = Url.Action("GetImageForProductId", "BrosShopImages", new { productId = item.BrosShopProductId });
+                                        // Проверяем, существует ли изображение
+                                        var defaultImageUrl = Url.Action("GetImageForProductId", "BrosShopImages", new { productId = 19 }); // Изображение по умолчанию
+                                    }
+                                    <img src="@imageUrl" class="fixed-image" alt="Image for @item.BrosShopTitle" onerror="this.onerror=null; this.src='@defaultImageUrl';" />
                                 </div>
                             </div>
                         </div>

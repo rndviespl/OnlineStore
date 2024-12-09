@@ -13,28 +13,34 @@
 else
 {
     <h3>Содержимое вашей корзины:</h3>
-    <table class="table">
+    <table class="table cart-table">
         <thead>
             <tr>
                 <th>Товар</th>
                 <th>Цена за штуку</th>
                 <th>Количество</th>
                 <th>Цена за все</th>
-                <th>Действия</th> <!-- Новый столбец для действий -->
+                <th>Действия</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var item in Model.CartItems)
             {
-                var product = Model.Products.FirstOrDefault(p => p.BrosShopProductId == item.ProductId); // Получаем продукт из списка
+                var product = Model.Products.FirstOrDefault(p => p.BrosShopProductId == item.ProductId);
                 if (product != null)
                 {
-                    decimal itemTotalPrice = product.BrosShopPrice * item.Quantity; // Вычисляем общую цену для товара
-                    totalAmount += itemTotalPrice; // Добавляем к общей сумме
+                    decimal itemTotalPrice = product.BrosShopPrice * item.Quantity;
+                    totalAmount += itemTotalPrice;
                     <tr>
                         <td>@product.BrosShopTitle</td>
                         <td>@product.BrosShopPrice.ToString("C")</td>
-                        <td>@item.Quantity</td>
+                        <td>
+                            <div class="input-group" style="display: flex; align-items: center; justify-content: center; width: 120px;">
+                                <button type="button" class="btn btn-secondary" style="width: 30px;" onclick="changeQuantity('@item.ProductId', -1)">-</button>
+                                <input type="number" id="quantity-@item.ProductId" name="quantity" value="@item.Quantity" min="1" max="254" step="1" class="form-control" style="width: 40px; text-align: center; margin: 0 5px;" readonly />
+                                <button type="button" class="btn btn-secondary" style="width: 30px;" onclick="changeQuantity('@item.ProductId', 1)">+</button>
+                            </div>
+                        </td>
                         <td>@itemTotalPrice.ToString("C")</td>
                         <td>
                             <form asp-action="RemoveFromCart" method="post" style="display:inline;">
@@ -50,8 +56,55 @@ else
 
     <h4>Сумма к оплате: @totalAmount.ToString("C")</h4>
 
-    <form asp-action="Checkout" method="post">
-        <input type="hidden" name="cartItems" value="@Html.Raw(Json.Serialize(Model.CartItems))" />
-        <button type="submit" name="checkoutButton" class="btn btn-primary">Оформить заказ</button>
-    </form>
+    @if (!Context.Request.Cookies.ContainsKey("Token"))
+    {
+        <div class="alert alert-warning" role="alert">
+            Вы не авторизованы. Для того чтобы сделать заказ, необходимо авторизоваться.
+        </div>
+        <a class="btn btn-primary" href="@Url.Action("Login", "Account")">Авторизоваться</a>
+    }
+    else
+    {
+        <form asp-action="Checkout" method="post">
+            <input type="hidden" name="cartItems" value="@Html.Raw(Json.Serialize(Model.CartItems))" />
+            <button type="submit" name="checkoutButton" class="btn btn-primary">Оформить заказ</button>
+        </form>
+    }
 }
+<script>
+    function changeQuantity(productId, change) {
+        var quantityInput = document.getElementById('quantity-' + productId);
+        var currentQuantity = parseInt(quantityInput.value);
+
+        // Рассчитываем новое количество
+        var newQuantity = currentQuantity + change;
+
+        // Проверяем, чтобы новое количество было в пределах 1-254
+        if (newQuantity >= 1 && newQuantity <= 254) {
+            quantityInput.value = newQuantity;
+            updateCart(productId, newQuantity); // Обновляем корзину на сервере
+        }
+    }
+
+    function updateCart(productId, quantity) {
+        $.ajax({
+            url: '@Url.Action("UpdateCart", "BrosShopCart")', // Укажите правильный путь к вашему методу
+            type: 'POST',
+            data: {
+                productId: productId,
+                quantity: quantity
+            },
+            success: function (response) {
+                if (response.success) {
+                    // alert("Корзина обновлена!");
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function () {
+                alert("Произошла ошибка при обновлении корзины.");
+            }
+        });
+    }
+</script>
+
