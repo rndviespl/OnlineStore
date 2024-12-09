@@ -84,26 +84,59 @@
             <input type="number" name="quantity" value="1" min="1" max="254" step="1" class="form-control" style="width: 100px; display: inline-block;" />
             <button type="submit" class="btn btn-primary">Добавить в корзину</button>
         </form>
+        <div id="remainingQuantity" class="mt-2">Осталось добавить: 254 единиц.</div>
+
         <div id="message" style="display:none;"></div>
 
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script>
             $(document).ready(function () {
+                // Обработчик для добавления товара в корзину
                 $('#addToCartForm').submit(function (event) {
                     event.preventDefault(); // Отменяем стандартное поведение формы
 
+                    var productId = $('input[name="productId"]').val();
+                    var quantity = parseInt($('input[name="quantity"]').val(), 10);
+
                     $.ajax({
-                        url: $(this).attr('action'), // URL для отправки данных
+                        url: '@Url.Action("AddToCart", "BrosShopCart")', // URL для добавления товара
                         type: 'POST',
-                        data: $(this).serialize(), // Сериализуем данные формы
+                        data: { productId: productId, quantity: quantity },
                         success: function (response) {
                             $('#message').text(response.message).show(); // Показываем сообщение
+                            updateCartInfo(); // Обновляем информацию о корзине
                         },
                         error: function (xhr, status, error) {
-                            $('#message').text('Произошла ошибка при добавлении товара: ' + error).show(); // Показываем сообщение об ошибке
+                            $('#message').text('Произошла ошибка: ' + error).show(); // Показываем сообщение об ошибке
                         }
                     });
                 });
+
+                // Функция для обновления информации о корзине
+                function updateCartInfo() {
+                    var productId = $('input[name="productId"]').val();
+
+                    // Получаем текущее количество товара в корзине через AJAX
+                    $.ajax({
+                        url: '@Url.Action("GetCartQuantity", "BrosShopCart")', // URL для получения количества товара в корзине
+                        type: 'GET',
+                        data: { productId: productId },
+                        success: function (response) {
+                            var currentQuantity = response.currentQuantity; // Получаем текущее количество из ответа
+                            var maxQuantity = 254;
+                            var remainingQuantity = maxQuantity - currentQuantity;
+
+                            // Обновляем элемент на странице, чтобы показать текущее количество и оставшееся
+                            $('#remainingQuantity').text('В корзине: ' + currentQuantity + '/' + maxQuantity + ' (осталось добавить: ' + remainingQuantity + ' единиц)');
+                        },
+                        error: function (xhr, status, error) {
+                            $('#message').text('Произошла ошибка при получении количества: ' + error).show(); // Показываем сообщение об ошибке
+                        }
+                    });
+                }
+
+                // Инициализация информации о корзине при загрузке страницы
+                updateCartInfo();
             });
         </script>
     </div>

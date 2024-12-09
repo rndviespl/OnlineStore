@@ -7,8 +7,10 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/WebApp2.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
 </head>
-<body>
+<body class="@((Context.Request.Cookies["theme"] == "1") ? "dark-theme" : "light-theme")">
+
     <header>
         <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
@@ -23,35 +25,33 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Главная</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">О нас</a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="BrosShopProducts" asp-action="Index">Каталог</a>
                         </li>
                         <li class="nav-item d-flex align-items-center">
-                            @if (Context.Request.Cookies.ContainsKey("Token"))
-                            {
-                                <a class="nav-link text-dark" asp-area="" asp-controller="BrosShopCart" asp-action="Index">Перейти в корзину</a>
-                            }
-                            else
-                            {
-                                <div class="text-danger mb-0 ms-3">Пожалуйста, авторизуйтесь, чтобы перейти в корзину.</div>
-                            }
+                            <a class="nav-link text-dark" asp-area="" asp-controller="BrosShopCart" asp-action="Index">Перейти в корзину</a>
                         </li>
                     </ul>
                     <div class="navbar-nav">
-                        <li class="nav-item">
-                            @if (!Context.Request.Cookies.ContainsKey("Token"))
-                            {
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Авторизация</a>
-                            }
-                            else if (Context.Request.Cookies.ContainsKey("Token"))
-                            {
-                                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" style="display:inline;">
-                                    <button type="submit" class="nav-link text-dark" style="border: none; background: none; padding: 0;">Выход</button>
-                                </form>
-                            }
-                        </li>
+                        <ul class="navbar-nav flex-grow-1">
+                            <li class="nav-item">
+                                <button id="theme-toggle" class="btn btn-outline-secondary">
+                                    <i class="bi bi-brightness-high"></i> <!-- Иконка по умолчанию -->
+                                    <span class="theme-text">Светлая тема</span> <!-- Текст по умолчанию -->
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                @if (!Context.Request.Cookies.ContainsKey("Token"))
+                                {
+                                    <a class="btn btn-outline-primary" asp-area="" asp-controller="Account" asp-action="Login">Авторизация</a>
+                                }
+                                else if (Context.Request.Cookies.ContainsKey("Token"))
+                                {
+                                    <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" style="display:inline;">
+                                        <button type="submit" class="btn btn-outline-danger" style="border: none;">Выход</button>
+                                    </form>
+                                }
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -66,6 +66,50 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const themeToggleButton = document.getElementById('theme-toggle');
+            const body = document.body;
+
+            // Проверяем куки на наличие темы
+            const theme = getCookie('theme');
+            if (theme === '1') {
+                body.classList.add('dark-theme');
+                themeToggleButton.innerHTML = '<i class="bi bi-moon"></i> <span class="theme-text">Темная тема</span>';
+            } else {
+                body.classList.add('light-theme');
+                themeToggleButton.innerHTML = '<i class="bi bi-brightness-high"></i> <span class="theme-text">Светлая тема</span>';
+            }
+
+            themeToggleButton.addEventListener('click', () => {
+                body.classList.toggle('dark-theme');
+                body.classList.toggle('light-theme');
+
+                // Сохраняем состояние темы в куки
+                const newTheme = body.classList.contains('dark-theme') ? '1' : '0';
+                setCookie('theme', newTheme, 7); // Сохраняем на 7 дней
+
+                // Меняем текст и иконку в зависимости от темы
+                if (body.classList.contains('dark-theme')) {
+                    themeToggleButton.innerHTML = '<i class="bi bi-moon"></i> <span class="theme-text">Темная тема</span>';
+                } else {
+                    themeToggleButton.innerHTML = '<i class="bi bi-brightness-high"></i> <span class="theme-text">Светлая тема</span>';
+                }
+            });
+        });
+
+        function setCookie(name, value, days) {
+            const expires = new Date(Date.now() + days * 864e5).toUTCString();
+            document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/';
+        }
+
+        function getCookie(name) {
+            return document.cookie.split('; ').reduce((r, v) => {
+                const parts = v.split('=');
+                return parts[0] === name ? decodeURIComponent(parts[1]) : r;
+            }, '');
+        }
+    </script>
 </body>
 </html>
-
