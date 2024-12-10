@@ -3,6 +3,8 @@
 @{
     ViewData["Title"] = "Details";
     var images = Model.BrosShopImages.ToList(); // Преобразуем в список
+    var defaultImageUrl = Url.Content("~/source/no_photo.jpg"); // URL изображения по умолчанию
+    bool hasImages = false; // Флаг для отслеживания наличия изображений
 }
 
 <!-- Подключение Bootstrap CSS -->
@@ -23,10 +25,13 @@
                     var imageInCollection = images[i];
                     if (imageInCollection != null) // Проверка на наличие изображения
                     {
-                        <div class="carousel-item @(i == 0 ? "active" : "")">
-                            <div class="fixed-image-container">
-                                <img src="@Url.Action("GetImage", "BrosShopImages", new { imageId = imageInCollection.BrosShopImagesId })" class="d-block w-100 fixed-image" alt="Image for @Model.BrosShopTitle" />
-                            </div>
+                        hasImages = true;
+                        <div class="fixed-image-container">
+                            @{
+                                // Получаем URL изображения
+                                var imageUrl = Url.Action("GetImage", "BrosShopImages", new { imageId = imageInCollection.BrosShopImagesId });
+                            }
+                            <img src="@imageUrl" class="fixed-image" alt="Image for @Model.BrosShopTitle" onerror="this.onerror=null;" />
                         </div>
                     }
                     else
@@ -35,6 +40,12 @@
                             <img src="@Url.Action("GetImage", "BrosShopImages", new { imageId = 21 })" class="d-block w-100 fixed-image" alt="Image for @Model.BrosShopTitle" />
                         </div>
                     }
+                }
+                @if (!hasImages) // Если изображения не найдены, выводим изображение по умолчанию
+                {
+                <div class="fixed-image-container">
+                    <img src="@defaultImageUrl" class="fixed-image" alt="Image for @Model.BrosShopTitle" onerror="this.onerror=null;" />
+                </div>
                 }
             </div>
             <a class="carousel-control-prev" href="#productCarousel" role="button" data-slide="prev">

@@ -25,7 +25,7 @@
                                         // Получаем URL изображения товара
                                         var imageUrl = Url.Action("GetImageForProductId", "BrosShopImages", new { productId = item.BrosShopProductId });
                                         // Проверяем, существует ли изображение
-                                        var defaultImageUrl = Url.Action("GetImageForProductId", "BrosShopImages", new { productId = 19 }); // Изображение по умолчанию
+                                        var defaultImageUrl = Url.Content("~/source/no_photo.jpg"); // Изображение по умолчанию
                                     }
                                     <img src="@imageUrl" class="fixed-image" alt="Image for @item.BrosShopTitle" onerror="this.onerror=null; this.src='@defaultImageUrl';" />
                                 </div>
