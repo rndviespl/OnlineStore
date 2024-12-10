@@ -174,7 +174,7 @@ namespace WebApp2.Controllers
                     {
                         BrosShopProductId = product.BrosShopProductId,
                         BrosShopQuantity = (sbyte)item.Quantity,
-                        BrosShopCost = product.BrosShopPrice * item.Quantity
+                        BrosShopCost = product.BrosShopPrice 
                     });
 
                     // Добавляем детали заказа в список

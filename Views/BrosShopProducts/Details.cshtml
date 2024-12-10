@@ -29,6 +29,12 @@
                             </div>
                         </div>
                     }
+                    else
+                    {
+                        <div class="fixed-image-container">
+                            <img src="@Url.Action("GetImage", "BrosShopImages", new { imageId = 21 })" class="d-block w-100 fixed-image" alt="Image for @Model.BrosShopTitle" />
+                        </div>
+                    }
                 }
             </div>
             <a class="carousel-control-prev" href="#productCarousel" role="button" data-slide="prev">
