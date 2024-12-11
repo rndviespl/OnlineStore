@@ -24,15 +24,31 @@ namespace WebApp2.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(string userName, string password, string phone)
         {
+            // Check if the user already exists
+            if (await _authService.UserExistsAsync(userName))
+            {
+                ModelState.AddModelError(string.Empty, "Пользователь с таким именем уже существует.");
+                return View(new UserDto { Username = userName, PhoneNumber = phone }); // Return the view with the error
+            }
+
             var userDto = new UserDto
             {
                 Username = userName,
                 Password = password,
                 PhoneNumber = phone
             };
-            var result = await _authService.RegisterAsync(userDto);
+
+            var response = await _authService.RegisterAsync(userDto);
+
+            if (response == null)
+            {
+                ModelState.AddModelError(string.Empty, "Ошибка регистрации. Попробуйте еще раз.");
+                return View(userDto); // Return the view with the error
+            }
+
             return RedirectToAction("Login");
         }
+
 
         [HttpGet("login")]
         public IActionResult Login()

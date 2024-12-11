@@ -10,14 +10,13 @@ public class AuthService
     private readonly HttpClient _httpClient;
     private readonly IConfiguration _configuration;
 
-
     public AuthService(HttpClient httpClient)
     {
         _httpClient = httpClient;
         _configuration = new ConfigurationBuilder()
-        .SetBasePath(Directory.GetCurrentDirectory())
-        .AddJsonFile("appsettings.json")
-        .Build();
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json")
+            .Build();
     }
 
     public async Task<string> RegisterAsync(UserDto userDto)
@@ -46,6 +45,12 @@ public class AuthService
         Console.WriteLine($"Username: {userDto.Username}, Password: {userDto.Password}, PhoneNumber: {userDto.PhoneNumber}");
 
         return "Dont Login";
+    }
+
+    public async Task<bool> UserExistsAsync(string userName)
+    {
+        var response = await _httpClient.GetAsync($"userexists?username={userName}");
+        return response.IsSuccessStatusCode && await response.Content.ReadAsStringAsync() == "true";
     }
 }
 
