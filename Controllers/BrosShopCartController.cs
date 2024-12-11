@@ -41,30 +41,31 @@ namespace WebApp2.Controllers
         [HttpPost]
         public IActionResult UpdateCart(int productId, int quantity)
         {
-            if (quantity < 1 || quantity > 254)
+            // Проверяем, что количество в допустимых пределах
+            if (quantity < 1 || quantity > 100)
             {
-                return Json(new { success = false, message = "Количество должно быть от 1 до 254." });
+                return Json(new { success = false, message = "Количество должно быть от 1 до 100." });
             }
 
+            // Получаем текущую корзину из куки
             var cartItems = GetCartFromCookies();
             var existingItem = cartItems.FirstOrDefault(i => i.ProductId == productId);
 
             if (existingItem != null)
             {
-                // Проверяем, не превышает ли новое количество максимальное значение
-                if (quantity > 254)
-                {
-                    return Json(new { success = false, message = "Максимальное количество для этого товара - 254." });
-                }
-                existingItem.Quantity = quantity; // Обновляем количество
+                // Обновляем количество товара в корзине
+                existingItem.Quantity = quantity;
             }
             else
             {
-                cartItems.Add(new CartItem { ProductId = productId, Quantity = quantity }); // Добавляем новый товар, если его нет
+                // Если товара нет в корзине, добавляем его
+                cartItems.Add(new CartItem { ProductId = productId, Quantity = quantity });
             }
 
+            // Сохраняем обновленную корзину в куки
             SaveCartToCookies(cartItems);
 
+            // Возвращаем успешный ответ
             return Json(new { success = true, message = "Корзина обновлена!" });
         }
 
@@ -79,9 +80,9 @@ namespace WebApp2.Controllers
             int currentQuantity = existingItem != null ? existingItem.Quantity : 0;
             int totalQuantity = currentQuantity + quantity;
 
-            if (totalQuantity > 254)
+            if (totalQuantity > 100)
             {
-                return Json(new { success = false, message = "Вы не можете добавить более 254 единиц этого товара." });
+                return Json(new { success = false, message = "Вы не можете добавить более 100 единиц этого товара." });
             }
 
             // Логика добавления товара в корзину

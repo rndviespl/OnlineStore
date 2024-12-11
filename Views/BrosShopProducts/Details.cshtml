@@ -26,26 +26,25 @@
                     if (imageInCollection != null) // Проверка на наличие изображения
                     {
                         hasImages = true;
-                        <div class="fixed-image-container">
-                            @{
-                                // Получаем URL изображения
-                                var imageUrl = Url.Action("GetImage", "BrosShopImages", new { imageId = imageInCollection.BrosShopImagesId });
-                            }
-                            <img src="@imageUrl" class="fixed-image" alt="Image for @Model.BrosShopTitle" onerror="this.onerror=null;" />
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="fixed-image-container">
-                            <img src="@Url.Action("GetImage", "BrosShopImages", new { imageId = 21 })" class="d-block w-100 fixed-image" alt="Image for @Model.BrosShopTitle" />
+                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                            <div class="image-container">
+                                @{
+                                    // Получаем URL изображения
+                                    var imageUrl = Url.Action("GetImage", "BrosShopImages", new { imageId = imageInCollection.BrosShopImagesId });
+                                }
+                                <img src="@imageUrl" class="fixed-image" alt="Image for @Model.BrosShopTitle" onerror="this.onerror=null;" />
+                            </div>
                         </div>
                     }
                 }
+
                 @if (!hasImages) // Если изображения не найдены, выводим изображение по умолчанию
                 {
-                <div class="fixed-image-container">
-                    <img src="@defaultImageUrl" class="fixed-image" alt="Image for @Model.BrosShopTitle" onerror="this.onerror=null;" />
-                </div>
+                    <div class="carousel-item active">
+                        <div class="image-container">
+                            <img src="@defaultImageUrl" class="fixed-image" alt="Image for @Model.BrosShopTitle" onerror="this.onerror=null;" />
+                        </div>
+                    </div>
                 }
             </div>
             <a class="carousel-control-prev" href="#productCarousel" role="button" data-slide="prev">
@@ -98,10 +97,10 @@
          <!-- Форма для добавления товара в корзину -->
         <form id="addToCartForm" asp-action="AddToCart" method="post">
             <input type="hidden" name="productId" value="@Model.BrosShopProductId" />
-            <input type="number" name="quantity" value="1" min="1" max="254" step="1" class="form-control" style="width: 100px; display: inline-block;" />
+            <input type="number" name="quantity" value="1" min="1" max="100" step="1" class="form-control" style="width: 100px; display: inline-block;" />
             <button type="submit" class="btn btn-primary">Добавить в корзину</button>
         </form>
-        <div id="remainingQuantity" class="mt-2">Осталось добавить: 254 единиц.</div>
+        <div id="remainingQuantity" class="mt-2">Осталось добавить: 100 единиц.</div>
 
         <div id="message" style="display:none;"></div>
 
@@ -140,7 +139,7 @@
                         data: { productId: productId },
                         success: function (response) {
                             var currentQuantity = response.currentQuantity; // Получаем текущее количество из ответа
-                            var maxQuantity = 254;
+                            var maxQuantity = 100;
                             var remainingQuantity = maxQuantity - currentQuantity;
 
                             // Обновляем элемент на странице, чтобы показать текущее количество и оставшееся
