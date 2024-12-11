@@ -1,17 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WebApp2.Models;
-using System.Collections.Generic;
-using System.Linq;
-using Newtonsoft.Json;
-using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using WebApp2.Data;
-using NuGet.Common;
-using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
+using Newtonsoft.Json;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
+using WebApp2.Data;
+using WebApp2.Models;
 
 namespace WebApp2.Controllers
 {
@@ -43,30 +38,78 @@ namespace WebApp2.Controllers
             return View(viewModel);
         }
 
-
         [HttpPost]
-        public IActionResult AddToCart(int productId, int quantity)
+        public IActionResult UpdateCart(int productId, int quantity)
         {
-            if (quantity <= 0)
+            // Проверяем, что количество в допустимых пределах
+            if (quantity < 1 || quantity > 100)
             {
-                return Json(new { success = false, message = "Количество должно быть больше нуля." });
+                return Json(new { success = false, message = "Количество должно быть от 1 до 100." });
             }
 
+            // Получаем текущую корзину из куки
             var cartItems = GetCartFromCookies();
             var existingItem = cartItems.FirstOrDefault(i => i.ProductId == productId);
 
             if (existingItem != null)
             {
-                existingItem.Quantity += quantity; // Увеличиваем количество, если товар уже в корзине
+                // Обновляем количество товара в корзине
+                existingItem.Quantity = quantity;
             }
             else
             {
-                cartItems.Add(new CartItem { ProductId = productId, Quantity = quantity }); // Добавляем новый товар
+                // Если товара нет в корзине, добавляем его
+                cartItems.Add(new CartItem { ProductId = productId, Quantity = quantity });
             }
 
+            // Сохраняем обновленную корзину в куки
             SaveCartToCookies(cartItems);
 
-            return Json(new { success = true, message = "Товар добавлен в корзину!" });
+            // Возвращаем успешный ответ
+            return Json(new { success = true, message = "Корзина обновлена!" });
+        }
+
+        [HttpPost]
+        public IActionResult AddToCart(int productId, int quantity)
+        {
+            // Получаем текущую корзину из куки
+            var cartItems = GetCartFromCookies();
+            var existingItem = cartItems.FirstOrDefault(item => item.ProductId == productId);
+
+            // Проверяем общее количество товара в корзине
+            int currentQuantity = existingItem != null ? existingItem.Quantity : 0;
+            int totalQuantity = currentQuantity + quantity;
+
+            if (totalQuantity > 100)
+            {
+                return Json(new { success = false, message = "Вы не можете добавить более 100 единиц этого товара." });
+            }
+
+            // Логика добавления товара в корзину
+            if (existingItem != null)
+            {
+                existingItem.Quantity += quantity;
+            }
+            else
+            {
+                cartItems.Add(new CartItem { ProductId = productId, Quantity = quantity });
+            }
+
+            // Сохранение обновленной корзины в куки
+            SaveCartToCookies(cartItems);
+
+            return Json(new { success = true, message = "Товар добавлен в корзину." });
+        }
+
+
+        [HttpGet]
+        public IActionResult GetCartQuantity(int productId)
+        {
+            var cartItems = GetCartFromCookies();
+            var existingItem = cartItems.FirstOrDefault(item => item.ProductId == productId);
+            int currentQuantity = existingItem != null ? existingItem.Quantity : 0;
+
+            return Json(new { currentQuantity });
         }
 
 
@@ -108,7 +151,7 @@ namespace WebApp2.Controllers
             var username = usernameClaim.Value;
 
             // Находим пользователя по username
-            var user = await _context.BrosShopUsers.FirstOrDefaultAsync(u => u.BrosShopUsername== username);
+            var user = await _context.BrosShopUsers.FirstOrDefaultAsync(u => u.BrosShopUsername == username);
             if (user == null)
             {
                 return Json(new { success = false, message = "Пользователь не найден." });
@@ -132,7 +175,7 @@ namespace WebApp2.Controllers
                     {
                         BrosShopProductId = product.BrosShopProductId,
                         BrosShopQuantity = (sbyte)item.Quantity,
-                        BrosShopCost = product.BrosShopPrice * item.Quantity
+                        BrosShopCost = product.BrosShopPrice 
                     });
 
                     // Добавляем детали заказа в список

@@ -3,6 +3,8 @@
 @{
     ViewData["Title"] = "Details";
     var images = Model.BrosShopImages.ToList(); // Преобразуем в список
+    var defaultImageUrl = Url.Content("~/source/no_photo.jpg"); // URL изображения по умолчанию
+    bool hasImages = false; // Флаг для отслеживания наличия изображений
 }
 
 <!-- Подключение Bootstrap CSS -->
@@ -23,12 +25,26 @@
                     var imageInCollection = images[i];
                     if (imageInCollection != null) // Проверка на наличие изображения
                     {
+                        hasImages = true;
                         <div class="carousel-item @(i == 0 ? "active" : "")">
-                            <div class="fixed-image-container">
-                                <img src="@Url.Action("GetImage", "BrosShopImages", new { imageId = imageInCollection.BrosShopImagesId })" class="d-block w-100 fixed-image" alt="Image for @Model.BrosShopTitle" />
+                            <div class="image-container">
+                                @{
+                                    // Получаем URL изображения
+                                    var imageUrl = Url.Action("GetImage", "BrosShopImages", new { imageId = imageInCollection.BrosShopImagesId });
+                                }
+                                <img src="@imageUrl" class="fixed-image" alt="Image for @Model.BrosShopTitle" onerror="this.onerror=null;" />
                             </div>
                         </div>
                     }
+                }
+
+                @if (!hasImages) // Если изображения не найдены, выводим изображение по умолчанию
+                {
+                    <div class="carousel-item active">
+                        <div class="image-container">
+                            <img src="@defaultImageUrl" class="fixed-image" alt="Image for @Model.BrosShopTitle" onerror="this.onerror=null;" />
+                        </div>
+                    </div>
                 }
             </div>
             <a class="carousel-control-prev" href="#productCarousel" role="button" data-slide="prev">
@@ -81,29 +97,62 @@
          <!-- Форма для добавления товара в корзину -->
         <form id="addToCartForm" asp-action="AddToCart" method="post">
             <input type="hidden" name="productId" value="@Model.BrosShopProductId" />
-            <input type="number" name="quantity" value="1" min="1" max="254" step="1" class="form-control" style="width: 100px; display: inline-block;" />
+            <input type="number" name="quantity" value="1" min="1" max="100" step="1" class="form-control" style="width: 100px; display: inline-block;" />
             <button type="submit" class="btn btn-primary">Добавить в корзину</button>
         </form>
+        <div id="remainingQuantity" class="mt-2">Осталось добавить: 100 единиц.</div>
+
         <div id="message" style="display:none;"></div>
 
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script>
             $(document).ready(function () {
+                // Обработчик для добавления товара в корзину
                 $('#addToCartForm').submit(function (event) {
                     event.preventDefault(); // Отменяем стандартное поведение формы
 
+                    var productId = $('input[name="productId"]').val();
+                    var quantity = parseInt($('input[name="quantity"]').val(), 10);
+
                     $.ajax({
-                        url: $(this).attr('action'), // URL для отправки данных
+                        url: '@Url.Action("AddToCart", "BrosShopCart")', // URL для добавления товара
                         type: 'POST',
-                        data: $(this).serialize(), // Сериализуем данные формы
+                        data: { productId: productId, quantity: quantity },
                         success: function (response) {
                             $('#message').text(response.message).show(); // Показываем сообщение
+                            updateCartInfo(); // Обновляем информацию о корзине
                         },
                         error: function (xhr, status, error) {
-                            $('#message').text('Произошла ошибка при добавлении товара: ' + error).show(); // Показываем сообщение об ошибке
+                            $('#message').text('Произошла ошибка: ' + error).show(); // Показываем сообщение об ошибке
                         }
                     });
                 });
+
+                // Функция для обновления информации о корзине
+                function updateCartInfo() {
+                    var productId = $('input[name="productId"]').val();
+
+                    // Получаем текущее количество товара в корзине через AJAX
+                    $.ajax({
+                        url: '@Url.Action("GetCartQuantity", "BrosShopCart")', // URL для получения количества товара в корзине
+                        type: 'GET',
+                        data: { productId: productId },
+                        success: function (response) {
+                            var currentQuantity = response.currentQuantity; // Получаем текущее количество из ответа
+                            var maxQuantity = 100;
+                            var remainingQuantity = maxQuantity - currentQuantity;
+
+                            // Обновляем элемент на странице, чтобы показать текущее количество и оставшееся
+                            $('#remainingQuantity').text('В корзине: ' + currentQuantity + '/' + maxQuantity + ' (осталось добавить: ' + remainingQuantity + ' единиц)');
+                        },
+                        error: function (xhr, status, error) {
+                            $('#message').text('Произошла ошибка при получении количества: ' + error).show(); // Показываем сообщение об ошибке
+                        }
+                    });
+                }
+
+                // Инициализация информации о корзине при загрузке страницы
+                updateCartInfo();
             });
         </script>
     </div>

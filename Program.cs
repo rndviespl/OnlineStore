@@ -25,7 +25,7 @@ namespace WebApp2
             builder.Services.AddHttpClient<BrosShopImagesController>();
 
             // Регистрация ApplicationContext с зависимостями
-            builder.Services.AddDbContext<ApplicationContext>((serviceProvider, options) =>
+            builder.Services.AddDbContextPool<ApplicationContext>((serviceProvider, options) =>
             {
                 var configuration = serviceProvider.GetRequiredService<IConfiguration>();
                 var connectionString = configuration.GetConnectionString("Default");

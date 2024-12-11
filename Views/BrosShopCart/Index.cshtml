@@ -1,4 +1,5 @@
-﻿@model WebApp2.Models.CartViewModel
+﻿@using System.Globalization
+@model WebApp2.Models.CartViewModel
 @{
     ViewData["Title"] = "Корзина";
     decimal totalAmount = 0; // Объявляем переменную для хранения общей суммы
@@ -13,29 +14,35 @@
 else
 {
     <h3>Содержимое вашей корзины:</h3>
-    <table class="table">
+    <table class="table cart-table">
         <thead>
             <tr>
                 <th>Товар</th>
                 <th>Цена за штуку</th>
                 <th>Количество</th>
                 <th>Цена за все</th>
-                <th>Действия</th> <!-- Новый столбец для действий -->
+                <th>Действия</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var item in Model.CartItems)
             {
-                var product = Model.Products.FirstOrDefault(p => p.BrosShopProductId == item.ProductId); // Получаем продукт из списка
+                var product = Model.Products.FirstOrDefault(p => p.BrosShopProductId == item.ProductId);
                 if (product != null)
                 {
-                    decimal itemTotalPrice = product.BrosShopPrice * item.Quantity; // Вычисляем общую цену для товара
-                    totalAmount += itemTotalPrice; // Добавляем к общей сумме
+                    decimal itemTotalPrice = product.BrosShopPrice * item.Quantity;
+                    totalAmount += itemTotalPrice;
                     <tr>
                         <td>@product.BrosShopTitle</td>
-                        <td>@product.BrosShopPrice.ToString("C")</td>
-                        <td>@item.Quantity</td>
-                        <td>@itemTotalPrice.ToString("C")</td>
+                        <td>@product.BrosShopPrice.ToString("F2", CultureInfo.InvariantCulture)</td>
+                        <td>
+                            <div class="input-group" style="display: flex; align-items: center; justify-content: center; width: 138px;">
+                                <button type="button" class="btn btn-secondary" style="width: 30px;" onclick="changeQuantity('@item.ProductId', -1)">-</button>
+                                <input type="number" id="quantity-@item.ProductId" name="quantity" value="@item.Quantity" min="1" max="254" step="1" class="form-control" style="width: 40px; text-align: center; margin: 0 5px;" readonly />
+                                <button type="button" class="btn btn-secondary" style="width: 30px;" onclick="changeQuantity('@item.ProductId', 1)">+</button>
+                            </div>
+                        </td>
+                        <td id="price-@item.ProductId" data-original-price="@product.BrosShopPrice.ToString("F2", CultureInfo.InvariantCulture)">@itemTotalPrice.ToString("C", CultureInfo.CurrentCulture)</td>
                         <td>
                             <form asp-action="RemoveFromCart" method="post" style="display:inline;">
                                 <input type="hidden" name="productId" value="@item.ProductId" />
@@ -48,10 +55,86 @@ else
         </tbody>
     </table>
 
-    <h4>Сумма к оплате: @totalAmount.ToString("C")</h4>
+    <h4>Сумма к оплате: <span id="totalAmount">@totalAmount.ToString("C", CultureInfo.CurrentCulture)</span></h4>
 
-    <form asp-action="Checkout" method="post">
-        <input type="hidden" name="cartItems" value="@Html.Raw(Json.Serialize(Model.CartItems))" />
-        <button type="submit" name="checkoutButton" class="btn btn-primary">Оформить заказ</button>
-    </form>
+    @if (!Context.Request.Cookies.ContainsKey("Token"))
+    {
+        <div class="alert alert-warning" role="alert">
+            Вы не авторизованы. Для того чтобы сделать заказ, необходимо авторизоваться.
+        </div>
+        <a class="btn btn-primary" href="@Url.Action("Login", "Account")">Авторизоваться</a>
+    }
+    else
+    {
+        <form asp-action="Checkout" method="post">
+            <input type="hidden" name="cartItems" value="@Html.Raw(Json.Serialize(Model.CartItems))" />
+            <button type="submit" name="checkoutButton" class="btn btn-primary">Оформить заказ</button>
+        </form>
+    }
 }
+<script>
+    function changeQuantity(productId, change) {
+        var quantityInput = document.getElementById('quantity-' + productId);
+        var currentQuantity = parseInt(quantityInput.value);
+
+        // Рассчитываем новое количество
+        var newQuantity = currentQuantity + change;
+
+        // Проверяем, чтобы новое количество было в пределах 1-100
+        if (newQuantity >= 1 && newQuantity <= 100) {
+            quantityInput.value = newQuantity;
+            updateCart(productId, newQuantity); // Обновляем корзину на сервере
+        }
+    }
+
+    function updateCart(productId, quantity) {
+        $.ajax({
+            url: '@Url.Action("UpdateCart", "BrosShopCart")',
+            type: 'POST',
+            data: {
+                productId: productId,
+                quantity: quantity
+            },
+            success: function (response) {
+                if (response.success) {
+                    console.log("Корзина обновлена!");
+    // Обновляем отображение цены и общей суммы
+                    updatePriceDisplay(productId, quantity); // Обновляем отображение цены
+                    updateTotalAmount(); // Обновляем общую сумму
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function () {
+                alert("Произошла ошибка при обновлении корзины.");
+            }
+        });
+    }
+
+    function updatePriceDisplay(productId, quantity) {
+        var priceCell = document.getElementById('price-' + productId);
+        var originalPrice = parseFloat(priceCell.getAttribute('data-original-price')); // Извлекаем исходную цену из атрибута
+        var newPrice = originalPrice * quantity; // Рассчитываем новую цену
+        priceCell.innerText = newPrice.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' }); // Форматируем цену
+    }
+
+    function updateTotalAmount() {
+        var totalAmount = 0;
+        // Проходим по всем элементам корзины и суммируем их цены
+        document.querySelectorAll('.cart-table tbody tr').forEach(function (row) {
+            var priceCell = row.querySelector('td[id^="price-"]');
+            var quantityInput = row.querySelector('input[name="quantity"]'); // Получаем поле ввода количества
+
+            if (priceCell && quantityInput) {
+                // Извлекаем общую цену для товара, удаляя все символы, кроме цифр и точки
+                var itemTotalPrice = parseFloat(priceCell.innerText.replace(/[^0-9,.-]+/g, "").replace(",", "."));
+                // Удаляем лишние нули после запятой
+                itemTotalPrice = parseFloat(itemTotalPrice.toFixed(2)); // Оставляем только 2 знака после запятой
+                var quantity = parseInt(quantityInput.value); // Получаем текущее количество
+                totalAmount += itemTotalPrice; // Суммируем общую стоимость
+            }
+        });
+        var totalAmountDisplay = document.getElementById('totalAmount');
+        totalAmountDisplay.innerText = totalAmount.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' }); // Форматируем общую сумму
+    }
+</script>

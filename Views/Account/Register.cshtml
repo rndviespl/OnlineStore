@@ -1,10 +1,19 @@
 ﻿@using WebApp2.Models;
 
 @model UserDto
-<!-- Вставьте это в <head> вашего _Layout.cshtml -->
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
 <h2>Регистрация</h2>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+    {
+        <div class="alert alert-danger" role="alert">
+            @error.ErrorMessage
+        </div>
+    }
+}
 
 <form method="post" asp-controller="Account" asp-action="Register" class="form-group">
     <div class="form-group">
