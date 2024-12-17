@@ -98,7 +98,7 @@ else
             success: function (response) {
                 if (response.success) {
                     console.log("Корзина обновлена!");
-    // Обновляем отображение цены и общей суммы
+                    // Обновляем отображение цены и общей суммы
                     updatePriceDisplay(productId, quantity); // Обновляем отображение цены
                     updateTotalAmount(); // Обновляем общую сумму
                 } else {
@@ -115,7 +115,8 @@ else
         var priceCell = document.getElementById('price-' + productId);
         var originalPrice = parseFloat(priceCell.getAttribute('data-original-price')); // Извлекаем исходную цену из атрибута
         var newPrice = originalPrice * quantity; // Рассчитываем новую цену
-        priceCell.innerText = newPrice.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' }); // Форматируем цену
+        priceCell.innerText = newPrice.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB', currencyDisplay: 'symbol' }); // Форматируем цену
+
     }
 
     function updateTotalAmount() {
@@ -135,6 +136,6 @@ else
             }
         });
         var totalAmountDisplay = document.getElementById('totalAmount');
-        totalAmountDisplay.innerText = totalAmount.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' }); // Форматируем общую сумму
+        totalAmountDisplay.innerText = totalAmount.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB', currencyDisplay: 'symbol' }); // Форматируем общую сумму
     }
 </script>
