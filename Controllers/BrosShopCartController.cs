@@ -39,7 +39,7 @@ namespace WebApp2.Controllers
         }
 
         [HttpPost]
-        public IActionResult UpdateCart(int productId, int quantity)
+        public IActionResult UpdateCart(int productId, int quantity, int sizeId)
         {
             // Проверяем, что количество в допустимых пределах
             if (quantity < 1 || quantity > 100)
@@ -49,7 +49,7 @@ namespace WebApp2.Controllers
 
             // Получаем текущую корзину из куки
             var cartItems = GetCartFromCookies();
-            var existingItem = cartItems.FirstOrDefault(i => i.ProductId == productId);
+            var existingItem = cartItems.FirstOrDefault(i => i.ProductId == productId && i.SizeId == sizeId);
 
             if (existingItem != null)
             {
@@ -70,11 +70,11 @@ namespace WebApp2.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddToCart(int productId, int quantity)
+        public IActionResult AddToCart(int productId, int quantity,int sizeId)
         {
             // Получаем текущую корзину из куки
             var cartItems = GetCartFromCookies();
-            var existingItem = cartItems.FirstOrDefault(item => item.ProductId == productId);
+            var existingItem = cartItems.FirstOrDefault(item => item.ProductId == productId && item.SizeId == sizeId);
 
             // Проверяем общее количество товара в корзине
             int currentQuantity = existingItem != null ? existingItem.Quantity : 0;
@@ -92,7 +92,7 @@ namespace WebApp2.Controllers
             }
             else
             {
-                cartItems.Add(new CartItem { ProductId = productId, Quantity = quantity });
+                cartItems.Add(new CartItem { ProductId = productId, Quantity = quantity, SizeId = sizeId});
             }
 
             // Сохранение обновленной корзины в куки

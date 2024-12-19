@@ -1,23 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+﻿//using System;
+//using System.Collections.Generic;
 
-namespace WebApp2.Models;
+//namespace WebApp2.Models;
 
-public partial class BrosShopReview
-{
-    public int BrosShopReviewId { get; set; }
+//public partial class BrosShopReview
+//{
+//    public int BrosShopReviewId { get; set; }
 
-    public int BrosShopProductId { get; set; }
+//    public int BrosShopProductId { get; set; }
 
-    public int BrosShopUserId { get; set; }
+//    public int BrosShopUserId { get; set; }
 
-    public sbyte BrosShopRating { get; set; }
+//    public sbyte BrosShopRating { get; set; }
 
-    public string? BrosShopComment { get; set; }
+//    public string? BrosShopComment { get; set; }
 
-    public DateTime BrosShopDateTime { get; set; }
+//    public DateTime BrosShopDateTime { get; set; }
 
-    public virtual BrosShopProduct BrosShopProduct { get; set; } = null!;
+//    public virtual BrosShopProduct BrosShopProduct { get; set; } = null!;
 
-    public virtual BrosShopUser BrosShopUser { get; set; } = null!;
-}
+//    public virtual BrosShopUser BrosShopUser { get; set; } = null!;
+//}

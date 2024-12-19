@@ -21,5 +21,5 @@ public partial class BrosShopUser
 
     public virtual ICollection<BrosShopOrder> BrosShopOrders { get; set; } = new List<BrosShopOrder>();
 
-    public virtual ICollection<BrosShopReview> BrosShopReviews { get; set; } = new List<BrosShopReview>();
+//    public virtual ICollection<BrosShopReview> BrosShopReviews { get; set; } = new List<BrosShopReview>();
 }

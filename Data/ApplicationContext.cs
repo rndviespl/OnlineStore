@@ -33,7 +33,7 @@ public partial class ApplicationContext : DbContext
 
     public virtual DbSet<BrosShopProductAttribute> BrosShopProductAttributes { get; set; }
 
-    public virtual DbSet<BrosShopReview> BrosShopReviews { get; set; }
+    //public virtual DbSet<BrosShopReview> BrosShopReviews { get; set; }
 
     public virtual DbSet<BrosShopSize> BrosShopSizes { get; set; }
 
@@ -236,38 +236,38 @@ public partial class ApplicationContext : DbContext
                 .HasConstraintName("BrosShop_Size_Attributes_1");
         });
 
-        modelBuilder.Entity<BrosShopReview>(entity =>
-        {
-            entity.HasKey(e => e.BrosShopReviewId).HasName("PRIMARY");
+        //modelBuilder.Entity<BrosShopReview>(entity =>
+        //{
+        //    entity.HasKey(e => e.BrosShopReviewId).HasName("PRIMARY");
 
-            entity.ToTable("BrosShop_Review");
+        //    entity.ToTable("BrosShop_Review");
 
-            entity.HasIndex(e => e.BrosShopProductId, "BrosShop_Review_ibfk_1");
+        //    entity.HasIndex(e => e.BrosShopProductId, "BrosShop_Review_ibfk_1");
 
-            entity.HasIndex(e => e.BrosShopUserId, "BrosShop_Review_ibfk_2");
+        //    entity.HasIndex(e => e.BrosShopUserId, "BrosShop_Review_ibfk_2");
 
-            entity.Property(e => e.BrosShopReviewId).HasColumnName("BrosShop_ReviewId");
-            entity.Property(e => e.BrosShopComment)
-                .HasColumnType("text")
-                .HasColumnName("BrosShop_Comment");
-            entity.Property(e => e.BrosShopDateTime)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("datetime")
-                .HasColumnName("BrosShop_DateTime");
-            entity.Property(e => e.BrosShopProductId).HasColumnName("BrosShop_ProductId");
-            entity.Property(e => e.BrosShopRating).HasColumnName("BrosShop_Rating");
-            entity.Property(e => e.BrosShopUserId).HasColumnName("BrosShop_UserId");
+        //    entity.Property(e => e.BrosShopReviewId).HasColumnName("BrosShop_ReviewId");
+        //    entity.Property(e => e.BrosShopComment)
+        //        .HasColumnType("text")
+        //        .HasColumnName("BrosShop_Comment");
+        //    entity.Property(e => e.BrosShopDateTime)
+        //        .HasDefaultValueSql("CURRENT_TIMESTAMP")
+        //        .HasColumnType("datetime")
+        //        .HasColumnName("BrosShop_DateTime");
+        //    entity.Property(e => e.BrosShopProductId).HasColumnName("BrosShop_ProductId");
+        //    entity.Property(e => e.BrosShopRating).HasColumnName("BrosShop_Rating");
+        //    entity.Property(e => e.BrosShopUserId).HasColumnName("BrosShop_UserId");
 
-            entity.HasOne(d => d.BrosShopProduct).WithMany(p => p.BrosShopReviews)
-                .HasForeignKey(d => d.BrosShopProductId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("BrosShop_Review_ibfk_1");
+        //    entity.HasOne(d => d.BrosShopProduct).WithMany(p => p.BrosShopReviews)
+        //        .HasForeignKey(d => d.BrosShopProductId)
+        //        .OnDelete(DeleteBehavior.ClientSetNull)
+        //        .HasConstraintName("BrosShop_Review_ibfk_1");
 
-            entity.HasOne(d => d.BrosShopUser).WithMany(p => p.BrosShopReviews)
-                .HasForeignKey(d => d.BrosShopUserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("BrosShop_Review_ibfk_2");
-        });
+        //    entity.HasOne(d => d.BrosShopUser).WithMany(p => p.BrosShopReviews)
+        //        .HasForeignKey(d => d.BrosShopUserId)
+        //        .OnDelete(DeleteBehavior.ClientSetNull)
+        //        .HasConstraintName("BrosShop_Review_ibfk_2");
+        //});
 
         modelBuilder.Entity<BrosShopSize>(entity =>
         {
