@@ -21,6 +21,8 @@ public partial class ApplicationContext : DbContext
 
     public virtual DbSet<BrosShopCategory> BrosShopCategories { get; set; }
 
+    public virtual DbSet<BrosShopColor> BrosShopColors { get; set; }
+
     public virtual DbSet<BrosShopImage> BrosShopImages { get; set; }
 
     public virtual DbSet<BrosShopOrder> BrosShopOrders { get; set; }
@@ -32,6 +34,8 @@ public partial class ApplicationContext : DbContext
     public virtual DbSet<BrosShopProductAttribute> BrosShopProductAttributes { get; set; }
 
     public virtual DbSet<BrosShopReview> BrosShopReviews { get; set; }
+
+    public virtual DbSet<BrosShopSize> BrosShopSizes { get; set; }
 
     public virtual DbSet<BrosShopUser> BrosShopUsers { get; set; }
 
@@ -77,6 +81,15 @@ public partial class ApplicationContext : DbContext
             entity.Property(e => e.BrosShopCategoryTitle)
                 .HasMaxLength(45)
                 .HasColumnName("BrosShop_CategoryTitle");
+        });
+
+        modelBuilder.Entity<BrosShopColor>(entity =>
+        {
+            entity.HasKey(e => e.ColorId).HasName("PRIMARY");
+
+            entity.ToTable("BrosShop_Color");
+
+            entity.Property(e => e.ColorTitle).HasMaxLength(15);
         });
 
         modelBuilder.Entity<BrosShopImage>(entity =>
@@ -127,20 +140,19 @@ public partial class ApplicationContext : DbContext
         modelBuilder.Entity<BrosShopOrderComposition>(entity =>
         {
             entity.HasKey(e => e.BrosShopProductId).HasName("PRIMARY");
-
             entity.ToTable("BrosShop_OrderComposition");
 
             entity.HasIndex(e => e.BrosShopOrderId, "BrosShop_OrderComposition_ibfk_2");
 
             entity.HasIndex(e => new { e.BrosShopProductId, e.BrosShopOrderId }, "BrosShop_ProductId").IsUnique();
-
             entity.Property(e => e.BrosShopProductId)
                 .ValueGeneratedNever()
-                .HasColumnName("BrosShop_ProductId");
+                .HasColumnName("BrosShop_ProductId"); 
             entity.Property(e => e.BrosShopCost)
-                .HasPrecision(7, 2)
+                .HasPrecision(9, 2)
                 .HasColumnName("BrosShop_Cost");
             entity.Property(e => e.BrosShopOrderId).HasColumnName("BrosShop_OrderId");
+            entity.Property(e => e.BrosShopProductId).HasColumnName("BrosShop_ProductId");
             entity.Property(e => e.BrosShopQuantity)
                 .HasDefaultValueSql("'1'")
                 .HasColumnName("BrosShop_Quantity");
@@ -154,6 +166,8 @@ public partial class ApplicationContext : DbContext
                 .HasForeignKey<BrosShopOrderComposition>(d => d.BrosShopProductId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("BrosShop_OrderComposition_ibfk_1");
+
+
         });
 
         modelBuilder.Entity<BrosShopProduct>(entity =>
@@ -163,8 +177,6 @@ public partial class ApplicationContext : DbContext
             entity.ToTable("BrosShop_Product");
 
             entity.HasIndex(e => e.BrosShopCategoryId, "BrosShop_FK_Category_idx");
-
-            entity.HasIndex(e => e.BrosShopWbarticul, "BrosShop_WBArticul_UNIQUE").IsUnique();
 
             entity.Property(e => e.BrosShopProductId).HasColumnName("BrosShop_ProductId");
             entity.Property(e => e.BrosShopCategoryId).HasColumnName("BrosShop_CategoryId");
@@ -198,22 +210,30 @@ public partial class ApplicationContext : DbContext
 
             entity.HasIndex(e => e.BrosShopProductId, "BrosShop_Product_Attributes_ibfk_1");
 
+            entity.HasIndex(e => e.BrosShopSize, "BrosShop_Size_Attributes_1_idx");
+
+            entity.HasIndex(e => e.BrosShopColorId, "index3");
+
             entity.Property(e => e.BrosShopAttributesId).HasColumnName("BrosShop_AttributesId");
-            entity.Property(e => e.BrosShopColor)
-                .HasMaxLength(25)
-                .HasColumnName("BrosShop_Color");
+            entity.Property(e => e.BrosShopColorId).HasColumnName("BrosShop_ColorId");
             entity.Property(e => e.BrosShopCount)
                 .HasDefaultValueSql("'1'")
                 .HasColumnName("BrosShop_Count");
             entity.Property(e => e.BrosShopProductId).HasColumnName("BrosShop_ProductId");
-            entity.Property(e => e.BrosShopSize)
-                .HasMaxLength(15)
-                .HasColumnName("BrosShop_Size");
+            entity.Property(e => e.BrosShopSize).HasColumnName("BrosShop_Size");
+
+            entity.HasOne(d => d.BrosShopColor).WithMany(p => p.BrosShopProductAttributes)
+                .HasForeignKey(d => d.BrosShopColorId)
+                .HasConstraintName("BrosShop_Color_Attributes_1");
 
             entity.HasOne(d => d.BrosShopProduct).WithMany(p => p.BrosShopProductAttributes)
                 .HasForeignKey(d => d.BrosShopProductId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("BrosShop_Product_Attributes_ibfk_1");
+
+            entity.HasOne(d => d.BrosShopSizeNavigation).WithMany(p => p.BrosShopProductAttributes)
+                .HasForeignKey(d => d.BrosShopSize)
+                .HasConstraintName("BrosShop_Size_Attributes_1");
         });
 
         modelBuilder.Entity<BrosShopReview>(entity =>
@@ -249,11 +269,22 @@ public partial class ApplicationContext : DbContext
                 .HasConstraintName("BrosShop_Review_ibfk_2");
         });
 
+        modelBuilder.Entity<BrosShopSize>(entity =>
+        {
+            entity.HasKey(e => e.SizeId).HasName("PRIMARY");
+
+            entity.ToTable("BrosShop_Size");
+
+            entity.Property(e => e.Size).HasMaxLength(10);
+        });
+
         modelBuilder.Entity<BrosShopUser>(entity =>
         {
             entity.HasKey(e => e.BrosShopUserId).HasName("PRIMARY");
 
             entity.ToTable("BrosShop_User");
+
+            entity.HasIndex(e => e.BrosShopUsername, "BrosShop_Username_UNIQUE").IsUnique();
 
             entity.Property(e => e.BrosShopUserId).HasColumnName("BrosShop_UserId");
             entity.Property(e => e.BrosShopEmail)

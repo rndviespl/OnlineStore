@@ -5,9 +5,9 @@ namespace WebApp2.Models;
 
 public partial class BrosShopOrderComposition
 {
-    public int BrosShopProductId { get; set; }
-
     public int BrosShopOrderId { get; set; }
+
+    public int BrosShopProductId { get; set; }
 
     public sbyte BrosShopQuantity { get; set; }
 

@@ -11,9 +11,13 @@ public partial class BrosShopProductAttribute
 
     public int BrosShopCount { get; set; }
 
-    public string? BrosShopColor { get; set; }
+    public int? BrosShopColorId { get; set; }
 
-    public string? BrosShopSize { get; set; }
+    public int? BrosShopSize { get; set; }
+
+    public virtual BrosShopColor? BrosShopColor { get; set; }
 
     public virtual BrosShopProduct BrosShopProduct { get; set; } = null!;
+
+    public virtual BrosShopSize? BrosShopSizeNavigation { get; set; }
 }
