@@ -87,7 +87,7 @@
                     @Html.DisplayFor(model => model.BrosShopCategory.BrosShopCategoryId)
                 </dd>
             </dl>
-            <div>
+                <div>
                 @if (Model.BrosShopProductAttributes != null && Model.BrosShopProductAttributes.Any())
                 {
                     foreach (var attribute in Model.BrosShopProductAttributes)
@@ -118,6 +118,7 @@
         <!-- Форма для добавления товара в корзину -->
         <form id="addToCartForm" asp-action="AddToCart" method="post">
             <input type="hidden" name="productId" value="@Model.BrosShopProductId" />
+       
             <input type="number" name="quantity" value="1" min="1" max="100" step="1" class="form-control" style="width: 100px; display: inline-block;" />
             <button type="submit" class="btn btn-primary">Добавить в корзину</button>
             <div id="remainingQuantity" class="mt-2">Осталось добавить: 100 единиц.</div>
@@ -137,30 +138,45 @@
 
                     var productId = $('input[name="productId"]').val();
                     var quantity = parseInt($('input[name="quantity"]').val(), 10);
+                    var sizeId = $('input[name="sizeId"]:checked').val(); // Получаем выбранный размер
+                    var $submitButton = $(this).find('button[type="submit"]');
+
+                    // Проверяем, выбран ли размер
+                    if (!sizeId) {
+                        $('#message').text('Пожалуйста, выберите размер.').show();
+                        return;
+                    }
+
+                    // Блокируем кнопку, чтобы предотвратить повторные нажатия
+                    $submitButton.prop('disabled', true);
 
                     $.ajax({
                         url: '@Url.Action("AddToCart", "BrosShopCart")', // URL для добавления товара
                         type: 'POST',
-                        data: { productId: productId, quantity: quantity },
+                        data: { productId: productId, quantity: quantity, sizeId: sizeId },
                         success: function (response) {
                             $('#message').text(response.message).show(); // Показываем сообщение
-                            updateCartInfo(); // Обновляем информацию о корзине
+                            updateCartInfo(sizeId); // Обновляем информацию о корзине с учетом размера
                         },
                         error: function (xhr, status, error) {
                             $('#message').text('Произошла ошибка: ' + error).show(); // Показываем сообщение об ошибке
+                        },
+                        complete: function () {
+                            // Включаем кнопку обратно после завершения запроса
+                            $submitButton.prop('disabled', false);
                         }
                     });
                 });
 
                 // Функция для обновления информации о корзине
-                function updateCartInfo() {
+                function updateCartInfo(sizeId) {
                     var productId = $('input[name="productId"]').val();
 
                     // Получаем текущее количество товара в корзине через AJAX
                     $.ajax({
                         url: '@Url.Action("GetCartQuantity", "BrosShopCart")', // URL для получения количества товара в корзине
                         type: 'GET',
-                        data: { productId: productId },
+                        data: { productId: productId, sizeId: sizeId }, // Передаем sizeId
                         success: function (response) {
                             var currentQuantity = response.currentQuantity; // Получаем текущее количество из ответа
                             var maxQuantity = 100;
@@ -176,9 +192,11 @@
                 }
 
                 // Инициализация информации о корзине при загрузке страницы
-                updateCartInfo();
+                // Предполагаем, что размер по умолчанию не выбран, поэтому передаем null
+                updateCartInfo(null);
             });
         </script>
+
     </div>
 </div>
 

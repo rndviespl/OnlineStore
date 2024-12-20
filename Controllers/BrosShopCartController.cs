@@ -25,14 +25,18 @@ namespace WebApp2.Controllers
         public async Task<IActionResult> Index()
         {
             var cartItems = GetCartFromCookies();
+            var productIds = cartItems.Select(ci => ci.ProductId).ToList();
+
             var products = await _context.BrosShopProducts
-                .Where(p => cartItems.Select(ci => ci.ProductId).Contains(p.BrosShopProductId))
+                .Include(p => p.BrosShopProductAttributes) // Загружаем атрибуты продукта
+                    .ThenInclude(a => a.BrosShopSizeNavigation) // Загружаем размеры
+                .Where(p => productIds.Contains(p.BrosShopProductId))
                 .ToListAsync();
 
             var viewModel = new CartViewModel
             {
                 CartItems = cartItems,
-                Products = products // Добавляем список продуктов
+                Products = products
             };
 
             return View(viewModel);
@@ -41,77 +45,71 @@ namespace WebApp2.Controllers
         [HttpPost]
         public IActionResult UpdateCart(int productId, int quantity, int sizeId)
         {
-            // Проверяем, что количество в допустимых пределах
             if (quantity < 1 || quantity > 100)
             {
                 return Json(new { success = false, message = "Количество должно быть от 1 до 100." });
             }
 
-            // Получаем текущую корзину из куки
             var cartItems = GetCartFromCookies();
             var existingItem = cartItems.FirstOrDefault(i => i.ProductId == productId && i.SizeId == sizeId);
 
             if (existingItem != null)
             {
-                // Обновляем количество товара в корзине
                 existingItem.Quantity = quantity;
             }
             else
             {
-                // Если товара нет в корзине, добавляем его
-                cartItems.Add(new CartItem { ProductId = productId, Quantity = quantity });
+                cartItems.Add(new CartItem { ProductId = productId, Quantity = quantity, SizeId = sizeId });
             }
 
-            // Сохраняем обновленную корзину в куки
             SaveCartToCookies(cartItems);
-
-            // Возвращаем успешный ответ
             return Json(new { success = true, message = "Корзина обновлена!" });
         }
 
         [HttpPost]
-        public IActionResult AddToCart(int productId, int quantity,int sizeId)
+        public IActionResult AddToCart(int productId, int quantity, int sizeId)
         {
-            // Получаем текущую корзину из куки
+            // Проверка на допустимое количество
+            if (quantity < 1 || quantity > 100)
+            {
+                return Json(new { success = false, message = "Количество должно быть от 1 до 100." });
+            }
+
             var cartItems = GetCartFromCookies();
             var existingItem = cartItems.FirstOrDefault(item => item.ProductId == productId && item.SizeId == sizeId);
 
-            // Проверяем общее количество товара в корзине
-            int currentQuantity = existingItem != null ? existingItem.Quantity : 0;
-            int totalQuantity = currentQuantity + quantity;
-
-            if (totalQuantity > 100)
-            {
-                return Json(new { success = false, message = "Вы не можете добавить более 100 единиц этого товара." });
-            }
-
-            // Логика добавления товара в корзину
+            // Если товар уже существует в корзине, увеличиваем количество
             if (existingItem != null)
             {
-                existingItem.Quantity += quantity;
+                int totalQuantity = existingItem.Quantity + quantity;
+
+                // Проверка на превышение максимального количества
+                if (totalQuantity > 100)
+                {
+                    return Json(new { success = false, message = "Вы не можете добавить более 100 единиц этого товара." });
+                }
+
+                existingItem.Quantity = totalQuantity; // Обновляем количество
             }
             else
             {
-                cartItems.Add(new CartItem { ProductId = productId, Quantity = quantity, SizeId = sizeId});
+                // Добавляем новый товар в корзину
+                cartItems.Add(new CartItem { ProductId = productId, Quantity = quantity, SizeId = sizeId });
             }
 
-            // Сохранение обновленной корзины в куки
             SaveCartToCookies(cartItems);
-
             return Json(new { success = true, message = "Товар добавлен в корзину." });
         }
-
 
         [HttpGet]
         public IActionResult GetCartQuantity(int productId)
         {
             var cartItems = GetCartFromCookies();
             var existingItem = cartItems.FirstOrDefault(item => item.ProductId == productId);
-            int currentQuantity = existingItem != null ? existingItem.Quantity : 0;
+            int currentQuantity = existingItem?.Quantity ?? 0;
 
             return Json(new { currentQuantity });
         }
-
 
         [HttpPost]
         public async Task<IActionResult> Checkout()
@@ -121,6 +119,7 @@ namespace WebApp2.Controllers
             {
                 return Json(new { success = false, message = "Корзина пуста." });
             }
+
             var jwtToken = Request.Cookies["Token"];
             var secretKey = _configuration["ApiSettings:SecretKey"];
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
@@ -134,15 +133,7 @@ namespace WebApp2.Controllers
                 ValidateAudience = false,
                 ClockSkew = TimeSpan.Zero
             }, out var validatedToken);
-            var claimsIdentity = principal.Identity as ClaimsIdentity;
-            if (claimsIdentity != null)
-            {
-                foreach (var claim in claimsIdentity.Claims)
-                {
-                    Console.WriteLine($"Claim Type: {claim.Type}, Claim Value: {claim.Value}");
-                }
-            }
-            // Получаем username из токена
+
             var usernameClaim = principal.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
             if (usernameClaim == null)
             {
@@ -150,57 +141,75 @@ namespace WebApp2.Controllers
             }
             var username = usernameClaim.Value;
 
-            // Находим пользователя по username
             var user = await _context.BrosShopUsers.FirstOrDefaultAsync(u => u.BrosShopUsername == username);
             if (user == null)
             {
                 return Json(new { success = false, message = "Пользователь не найден." });
             }
 
+            // Создаем новый заказ
             var brosShopOrder = new BrosShopOrder
             {
-                BrosShopUserId = user.BrosShopUserId, // Замените на фактический ID пользователя
+                BrosShopUserId = user.BrosShopUserId,
                 BrosShopDateTimeOrder = DateTime.UtcNow,
-                BrosShopTypeOrder = "веб-сайт",
-                BrosShopOrderCompositions = new List<BrosShopOrderComposition>()
+                BrosShopTypeOrder = "веб-сайт"
             };
+
+            // Добавляем заказ в контекст и сохраняем изменения, чтобы получить идентификатор заказа
+            _context.BrosShopOrders.Add(brosShopOrder);
+            await _context.SaveChangesAsync();
+
+            // Теперь у нас есть идентификатор заказа
+            var orderId = brosShopOrder.BrosShopOrderId;
+
             var orderDetails = new List<OrderDetail>(); // Создаем список для деталей заказа
 
             foreach (var item in cartItems)
             {
-                var product = await _context.BrosShopProducts.FindAsync(item.ProductId);
-                if (product != null)
+                // Получаем атрибут продукта по ProductId и SizeId
+                var productAttribute = await _context.BrosShopProductAttributes
+                    .Include(pa => pa.BrosShopProduct) // Загружаем продукт
+                    .Include(pa => pa.BrosShopSizeNavigation) // Загружаем размер
+                    .FirstOrDefaultAsync(pa => pa.BrosShopAttributesId == item.ProductId && pa.BrosShopSize == item.SizeId);
+
+                if (productAttribute != null)
                 {
-                    brosShopOrder.BrosShopOrderCompositions.Add(new BrosShopOrderComposition
+                    // Создаем составную часть заказа
+                    var orderComposition = new BrosShopOrderComposition
                     {
-                        BrosShopProductId = product.BrosShopProductId,
+                        BrosShopOrderId = orderId, // Устанавливаем идентификатор заказа
+                        BrosShopAttributesId = productAttribute.BrosShopAttributesId,
                         BrosShopQuantity = (sbyte)item.Quantity,
-                        BrosShopCost = product.BrosShopPrice
-                    });
+                        BrosShopCost = productAttribute.BrosShopProduct.BrosShopPrice
+                    };
+
+                    // Добавляем составную часть заказа в контекст
+                    _context.BrosShopOrderCompositions.Add(orderComposition);
 
                     // Добавляем детали заказа в список
                     orderDetails.Add(new OrderDetail
                     {
-                        ProductTitle = product.BrosShopTitle,
+                        ProductTitle = productAttribute.BrosShopProduct.BrosShopTitle,
                         Quantity = item.Quantity,
-                        UnitPrice = product.BrosShopPrice,
-                        TotalPrice = product.BrosShopPrice * item.Quantity
+                        UnitPrice = productAttribute.BrosShopProduct.BrosShopPrice,
+                        TotalPrice = productAttribute.BrosShopProduct.BrosShopPrice * item.Quantity
                     });
                 }
                 else
                 {
-                    return Json(new { success = false, message = $"Продукт с ID {item.ProductId} не найден." });
+                    return Json(new { success = false, message = $"Продукт с ID {item.ProductId} и размером {item.SizeId} не найден." });
                 }
             }
 
-            _context.BrosShopOrders.Add(brosShopOrder);
+            // Сохраняем изменения для составных частей заказа
             await _context.SaveChangesAsync();
 
+            // Удаляем корзину из куки
             Response.Cookies.Delete(CartCookieKey);
+
             // Перенаправляем на страницу подтверждения заказа с деталями
             return View("OrderConfirmation", orderDetails);
         }
-
 
         public IActionResult OrderConfirmation()
         {
@@ -217,12 +226,6 @@ namespace WebApp2.Controllers
             return new List<CartItem>();
         }
 
-        private List<OrderDetail> GetOrderDetails()
-        {
-            // Здесь вы можете реализовать логику для получения деталей заказа
-            return new List<OrderDetail>(); // Возвращаем пустой список или заполненный
-        }
-
         private void SaveCartToCookies(List<CartItem> cartItems)
         {
             var cookieValue = JsonConvert.SerializeObject(cartItems);
@@ -234,28 +237,20 @@ namespace WebApp2.Controllers
             Response.Cookies.Append(CartCookieKey, cookieValue, cookieOptions);
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult RemoveFromCart(int productId)
         {
-            // Получаем текущую корзину из куки
-            var cart = HttpContext.Request.Cookies[CartCookieKey];
-            var cartItems = string.IsNullOrEmpty(cart) ? new List<CartItem>() : JsonConvert.DeserializeObject<List<CartItem>>(cart);
-
-            // Удаляем товар из корзины
+            var cartItems = GetCartFromCookies();
             var itemToRemove = cartItems.FirstOrDefault(item => item.ProductId == productId);
             if (itemToRemove != null)
             {
                 cartItems.Remove(itemToRemove);
             }
 
-            // Сохраняем обновленную корзину обратно в куки
-            var updatedCart = JsonConvert.SerializeObject(cartItems);
-            HttpContext.Response.Cookies.Append(CartCookieKey, updatedCart, new CookieOptions { HttpOnly = true });
-
-            // Перенаправляем на страницу корзины
-            return RedirectToAction("Index"); // Перенаправляем на метод Cart, который отображает корзину
+            SaveCartToCookies(cartItems);
+            return RedirectToAction("Index");
         }
     }
 }
+

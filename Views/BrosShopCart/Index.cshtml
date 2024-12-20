@@ -18,6 +18,7 @@ else
         <thead>
             <tr>
                 <th>Товар</th>
+                <th>размер</th>
                 <th>Цена за штуку</th>
                 <th>Количество</th>
                 <th>Цена за все</th>
@@ -34,6 +35,24 @@ else
                     totalAmount += itemTotalPrice;
                     <tr>
                         <td>@product.BrosShopTitle</td>
+                        <td>
+                            @if (product.BrosShopProductAttributes != null && product.BrosShopProductAttributes.Any())
+                            {
+                                var sizeAttribute = product.BrosShopProductAttributes.FirstOrDefault(a => a.BrosShopSizeNavigation != null && a.BrosShopSizeNavigation.SizeId == item.SizeId);
+                                if (sizeAttribute != null)
+                                {
+                                    @sizeAttribute.BrosShopSizeNavigation.Size
+                                }
+                                else
+                                {
+                                    <span>Размер не указан</span>
+                                }
+                            }
+                            else
+                            {
+                                <span>Размеры не доступны</span>
+                            }
+                        </td>
                         <td>@product.BrosShopPrice.ToString("F2", CultureInfo.InvariantCulture)</td>
                         <td>
                             <div class="input-group" style="display: flex; align-items: center; justify-content: center; width: 138px;">

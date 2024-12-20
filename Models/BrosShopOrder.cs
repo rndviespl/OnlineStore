@@ -12,7 +12,6 @@ public partial class BrosShopOrder
     public DateTime BrosShopDateTimeOrder { get; set; }
 
     public string? BrosShopTypeOrder { get; set; }
-    public virtual ICollection<BrosShopOrderComposition> BrosShopOrderCompositions { get; set; } = new List<BrosShopOrderComposition>();
 
     public virtual BrosShopUser BrosShopUser { get; set; } = null!;
 }

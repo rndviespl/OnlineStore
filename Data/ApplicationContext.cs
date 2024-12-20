@@ -33,12 +33,9 @@ public partial class ApplicationContext : DbContext
 
     public virtual DbSet<BrosShopProductAttribute> BrosShopProductAttributes { get; set; }
 
-    //public virtual DbSet<BrosShopReview> BrosShopReviews { get; set; }
-
     public virtual DbSet<BrosShopSize> BrosShopSizes { get; set; }
 
     public virtual DbSet<BrosShopUser> BrosShopUsers { get; set; }
-
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
@@ -139,35 +136,32 @@ public partial class ApplicationContext : DbContext
 
         modelBuilder.Entity<BrosShopOrderComposition>(entity =>
         {
-            entity.HasKey(e => e.BrosShopProductId).HasName("PRIMARY");
-            entity.ToTable("BrosShop_OrderComposition");
+            entity
+                .HasNoKey()
+                .ToTable("BrosShop_OrderComposition");
+
+            entity.HasIndex(e => e.BrosShopAttributesId, "BrosShop_OrderComposition_ibfk_1_idx");
 
             entity.HasIndex(e => e.BrosShopOrderId, "BrosShop_OrderComposition_ibfk_2");
 
-            entity.HasIndex(e => new { e.BrosShopProductId, e.BrosShopOrderId }, "BrosShop_ProductId").IsUnique();
-            entity.Property(e => e.BrosShopProductId)
-                .ValueGeneratedNever()
-                .HasColumnName("BrosShop_ProductId"); 
+            entity.Property(e => e.BrosShopAttributesId).HasColumnName("BrosShop_AttributesId");
             entity.Property(e => e.BrosShopCost)
                 .HasPrecision(9, 2)
                 .HasColumnName("BrosShop_Cost");
             entity.Property(e => e.BrosShopOrderId).HasColumnName("BrosShop_OrderId");
-            entity.Property(e => e.BrosShopProductId).HasColumnName("BrosShop_ProductId");
             entity.Property(e => e.BrosShopQuantity)
                 .HasDefaultValueSql("'1'")
                 .HasColumnName("BrosShop_Quantity");
 
-            entity.HasOne(d => d.BrosShopOrder).WithMany(p => p.BrosShopOrderCompositions)
+            entity.HasOne(d => d.BrosShopAttributes).WithMany()
+                .HasForeignKey(d => d.BrosShopAttributesId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_BrosShop_OrderComposition_1");
+
+            entity.HasOne(d => d.BrosShopOrder).WithMany()
                 .HasForeignKey(d => d.BrosShopOrderId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("BrosShop_OrderComposition_ibfk_2");
-
-            entity.HasOne(d => d.BrosShopProduct).WithOne(p => p.BrosShopOrderComposition)
-                .HasForeignKey<BrosShopOrderComposition>(d => d.BrosShopProductId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("BrosShop_OrderComposition_ibfk_1");
-
-
         });
 
         modelBuilder.Entity<BrosShopProduct>(entity =>
@@ -235,39 +229,6 @@ public partial class ApplicationContext : DbContext
                 .HasForeignKey(d => d.BrosShopSize)
                 .HasConstraintName("BrosShop_Size_Attributes_1");
         });
-
-        //modelBuilder.Entity<BrosShopReview>(entity =>
-        //{
-        //    entity.HasKey(e => e.BrosShopReviewId).HasName("PRIMARY");
-
-        //    entity.ToTable("BrosShop_Review");
-
-        //    entity.HasIndex(e => e.BrosShopProductId, "BrosShop_Review_ibfk_1");
-
-        //    entity.HasIndex(e => e.BrosShopUserId, "BrosShop_Review_ibfk_2");
-
-        //    entity.Property(e => e.BrosShopReviewId).HasColumnName("BrosShop_ReviewId");
-        //    entity.Property(e => e.BrosShopComment)
-        //        .HasColumnType("text")
-        //        .HasColumnName("BrosShop_Comment");
-        //    entity.Property(e => e.BrosShopDateTime)
-        //        .HasDefaultValueSql("CURRENT_TIMESTAMP")
-        //        .HasColumnType("datetime")
-        //        .HasColumnName("BrosShop_DateTime");
-        //    entity.Property(e => e.BrosShopProductId).HasColumnName("BrosShop_ProductId");
-        //    entity.Property(e => e.BrosShopRating).HasColumnName("BrosShop_Rating");
-        //    entity.Property(e => e.BrosShopUserId).HasColumnName("BrosShop_UserId");
-
-        //    entity.HasOne(d => d.BrosShopProduct).WithMany(p => p.BrosShopReviews)
-        //        .HasForeignKey(d => d.BrosShopProductId)
-        //        .OnDelete(DeleteBehavior.ClientSetNull)
-        //        .HasConstraintName("BrosShop_Review_ibfk_1");
-
-        //    entity.HasOne(d => d.BrosShopUser).WithMany(p => p.BrosShopReviews)
-        //        .HasForeignKey(d => d.BrosShopUserId)
-        //        .OnDelete(DeleteBehavior.ClientSetNull)
-        //        .HasConstraintName("BrosShop_Review_ibfk_2");
-        //});
 
         modelBuilder.Entity<BrosShopSize>(entity =>
         {
