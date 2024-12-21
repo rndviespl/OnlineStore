@@ -23,9 +23,10 @@ else
         <thead>
             <tr>
                 <th>Товар</th>
+                <th>Размер</th> <!-- Заголовок для размера -->
                 <th>Количество</th>
-                <th>Цена за единицу</th>
-                <th>Итоговая стоимость</th>
+                <th>Цена за единицу (₽)</th> <!-- Добавлен символ рубля -->
+                <th>Итоговая стоимость (₽)</th> <!-- Добавлен символ рубля -->
             </tr>
         </thead>
         <tbody>
@@ -33,16 +34,26 @@ else
             {
                 <tr>
                     <td>@item.ProductTitle</td> <!-- Название товара -->
+                    <td>
+                        @if (!string.IsNullOrEmpty(item.SizeName)) // Проверяем, есть ли размер
+                        {
+                            <span>@item.SizeName</span> <!-- Отображаем размер -->
+                        }
+                        else
+                        {
+                            <span>Размер не указан</span> <!-- Если размер не указан -->
+                        }
+                    </td>
                     <td>@item.Quantity</td> <!-- Количество -->
-                    <td>@item.UnitPrice.ToString("C")</td> <!-- Цена за единицу -->
-                    <td>@item.TotalPrice.ToString("C")</td> <!-- Итоговая стоимость -->
+                    <td>@item.UnitPrice.ToString("F2") ₽</td> <!-- Цена за единицу с символом рубля -->
+                    <td>@item.TotalPrice.ToString("F2") ₽</td> <!-- Итоговая стоимость с символом рубля -->
                 </tr>
                 totalAmount += item.TotalPrice; // Добавляем итоговую стоимость к общей сумме
             }
         </tbody>
     </table>
 
-    <h4>Сумма к оплате: @totalAmount.ToString("C")</h4> <!-- Отображаем общую сумму -->
+    <h4>Сумма к оплате: @totalAmount.ToString("F2") ₽</h4> <!-- Отображаем общую сумму с символом рубля -->
 }
 
 <h3>Оплата:</h3>

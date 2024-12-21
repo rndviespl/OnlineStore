@@ -56,7 +56,7 @@ else
                                 <span>Размеры не доступны</span>
                             }
                         </td>
-                        <td>@product.BrosShopPrice.ToString("F2", CultureInfo.InvariantCulture)</td>
+                        <td>@product.BrosShopPrice.ToString("F2") ₽</td>
                         <td>
                             <div class="input-group" style="display: flex; align-items: center; justify-content: center; width: 138px;">
                                 <button type="button" class="btn btn-secondary" style="width: 30px;" onclick="changeQuantity('@item.ProductId', '@item.SizeId', -1)">-</button>
@@ -64,7 +64,7 @@ else
                                 <button type="button" class="btn btn-secondary" style="width: 30px;" onclick="changeQuantity('@item.ProductId', '@item.SizeId', 1)">+</button>
                             </div>
                         </td>
-                        <td id="price-@item.ProductId-@item.SizeId" data-original-price="@product.BrosShopPrice.ToString("F2", CultureInfo.InvariantCulture)">@itemTotalPrice.ToString("C", CultureInfo.CurrentCulture)</td>
+                        <td id="price-@item.ProductId-@item.SizeId" data-original-price="@product.BrosShopPrice.ToString("F2")">@itemTotalPrice.ToString("C") </td>
                         <td>
                             <form asp-action="RemoveFromCart" method="post" style="display:inline;">
                                 <input type="hidden" name="productId" value="@item.ProductId" />
@@ -78,7 +78,7 @@ else
         </tbody>
     </table>
 
-    <h4>Сумма к оплате: <span id="totalAmount">@totalAmount.ToString("C", CultureInfo.CurrentCulture)</span></h4>
+    <h4>Сумма к оплате: <span id="totalAmount">@totalAmount.ToString("F2")</span> ₽</h4>
 
     @if (!Context.Request.Cookies.ContainsKey("Token"))
     {

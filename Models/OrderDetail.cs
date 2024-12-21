@@ -7,6 +7,7 @@
             public string? ProductTitle { get; set; }
             public int Quantity { get; set; }
             public int SizeId { get; set; }
+            public string SizeName { get; set; }
             public decimal UnitPrice { get; set; }
             public decimal TotalPrice { get; set; }
         }
