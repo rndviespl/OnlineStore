@@ -16,6 +16,7 @@ namespace WebApp2.Controllers
         private readonly ApplicationContext _context;
         private readonly IConfiguration _configuration;
 
+
         public BrosShopCartController(ApplicationContext context, IConfiguration configuration)
         {
             _context = context;
@@ -102,10 +103,10 @@ namespace WebApp2.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetCartQuantity(int productId)
+        public IActionResult GetCartQuantity(int productId, int sizeId)
         {
             var cartItems = GetCartFromCookies();
-            var existingItem = cartItems.FirstOrDefault(item => item.ProductId == productId);
+            var existingItem = cartItems.FirstOrDefault(item => item.ProductId == productId && item.SizeId == sizeId);
             int currentQuantity = existingItem?.Quantity ?? 0;
 
             return Json(new { currentQuantity });
@@ -114,102 +115,107 @@ namespace WebApp2.Controllers
         [HttpPost]
         public async Task<IActionResult> Checkout()
         {
-            var cartItems = GetCartFromCookies();
-            if (!cartItems.Any())
-            {
-                return Json(new { success = false, message = "Корзина пуста." });
-            }
-
-            var jwtToken = Request.Cookies["Token"];
-            var secretKey = _configuration["ApiSettings:SecretKey"];
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-            var tokenHandler = new JwtSecurityTokenHandler();
-
-            var principal = tokenHandler.ValidateToken(jwtToken, new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = key,
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ClockSkew = TimeSpan.Zero
-            }, out var validatedToken);
-
-            var usernameClaim = principal.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
-            if (usernameClaim == null)
-            {
-                return Json(new { success = false, message = "Username не найден в токене." });
-            }
-            var username = usernameClaim.Value;
-
-            var user = await _context.BrosShopUsers.FirstOrDefaultAsync(u => u.BrosShopUsername == username);
-            if (user == null)
-            {
-                return Json(new { success = false, message = "Пользователь не найден." });
-            }
-
-            // Создаем новый заказ
-            var brosShopOrder = new BrosShopOrder
-            {
-                BrosShopUserId = user.BrosShopUserId,
-                BrosShopDateTimeOrder = DateTime.UtcNow,
-                BrosShopTypeOrder = "веб-сайт"
-            };
-
-            // Добавляем заказ в контекст и сохраняем изменения, чтобы получить идентификатор заказа
-            _context.BrosShopOrders.Add(brosShopOrder);
-            await _context.SaveChangesAsync();
-
-            // Теперь у нас есть идентификатор заказа
-            var orderId = brosShopOrder.BrosShopOrderId;
-
-            var orderDetails = new List<OrderDetail>(); // Создаем список для деталей заказа
-
-            foreach (var item in cartItems)
-            {
-                // Получаем атрибут продукта по ProductId и SizeId
-                var productAttribute = await _context.BrosShopProductAttributes
-                    .Include(pa => pa.BrosShopProduct) // Загружаем продукт
-                    .Include(pa => pa.BrosShopSizeNavigation) // Загружаем размер
-                    .FirstOrDefaultAsync(pa => pa.BrosShopAttributesId == item.ProductId && pa.BrosShopSize == item.SizeId);
-
-                if (productAttribute != null)
+           
+                var cartItems = GetCartFromCookies();
+                if (!cartItems.Any())
                 {
-                    // Создаем составную часть заказа
-                    var orderComposition = new BrosShopOrderComposition
-                    {
-                        BrosShopOrderId = orderId, // Устанавливаем идентификатор заказа
-                        BrosShopAttributesId = productAttribute.BrosShopAttributesId,
-                        BrosShopQuantity = (sbyte)item.Quantity,
-                        BrosShopCost = productAttribute.BrosShopProduct.BrosShopPrice
-                    };
-
-                    // Добавляем составную часть заказа в контекст
-                    _context.BrosShopOrderCompositions.Add(orderComposition);
-
-                    // Добавляем детали заказа в список
-                    orderDetails.Add(new OrderDetail
-                    {
-                        ProductTitle = productAttribute.BrosShopProduct.BrosShopTitle,
-                        Quantity = item.Quantity,
-                        UnitPrice = productAttribute.BrosShopProduct.BrosShopPrice,
-                        TotalPrice = productAttribute.BrosShopProduct.BrosShopPrice * item.Quantity
-                    });
+                    return Json(new { success = false, message = "Корзина пуста." });
                 }
-                else
+
+                var jwtToken = Request.Cookies["Token"];
+                var secretKey = _configuration["ApiSettings:SecretKey"];
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+                var tokenHandler = new JwtSecurityTokenHandler();
+
+                // Проверка и валидация токена
+                var principal = tokenHandler.ValidateToken(jwtToken, new TokenValidationParameters
                 {
-                    return Json(new { success = false, message = $"Продукт с ID {item.ProductId} и размером {item.SizeId} не найден." });
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = key,
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ClockSkew = TimeSpan.Zero
+                }, out var validatedToken);
+
+                var usernameClaim = principal.FindFirst(ClaimTypes.NameIdentifier);
+                if (usernameClaim == null)
+                {
+                    return Json(new { success = false, message = "Username не найден в токене." });
                 }
+                var username = usernameClaim.Value;
+
+                var user = await _context.BrosShopUsers.FirstOrDefaultAsync(u => u.BrosShopUsername == username);
+                if (user == null)
+                {
+                    return Json(new { success = false, message = "Пользователь не найден." });
+                }
+
+                // Создаем новый заказ
+                var brosShopOrder = new BrosShopOrder
+                {
+                    BrosShopUserId = user.BrosShopUserId,
+                    BrosShopDateTimeOrder = DateTime.UtcNow,
+                    BrosShopTypeOrder = "веб-сайт"
+                };
+
+                // Добавляем заказ в контекст и сохраняем изменения, чтобы получить идентификатор заказа
+                _context.BrosShopOrders.Add(brosShopOrder);
+                await _context.SaveChangesAsync();
+
+                // Теперь у нас есть идентификатор заказа
+                var orderId = brosShopOrder.BrosShopOrderId;
+
+                var orderDetails = new List<OrderDetail>(); // Создаем список для деталей заказа
+                foreach (var item in cartItems)
+                {
+                    // Получаем атрибут продукта по ProductId и SizeId
+                    var productAttribute = await _context.BrosShopProductAttributes
+                        .Include(pa => pa.BrosShopProduct) // Загружаем продукт
+                        .Include(pa => pa.BrosShopSizeNavigation) // Загружаем размер
+                        .FirstOrDefaultAsync(pa => pa.BrosShopProductId == item.ProductId && pa.BrosShopSize == item.SizeId);
+
+                    if (productAttribute != null)
+                    {
+                        // Создаем составную часть заказа
+                        var orderComposition = new BrosShopOrderComposition
+                        {
+                            BrosShopOrderId = orderId, // Устанавливаем идентификатор заказа
+                            BrosShopAttributesId = productAttribute.BrosShopAttributesId,
+                            BrosShopQuantity = (sbyte)item.Quantity,
+                            BrosShopCost = productAttribute.BrosShopProduct.BrosShopPrice
+                        };
+
+                        // Добавляем составную часть заказа в контекст
+                        _context.BrosShopOrderCompositions.Add(orderComposition);
+
+                        // Добавляем детали заказа в список
+                        orderDetails.Add(new OrderDetail
+                        {
+                            ProductTitle = productAttribute.BrosShopProduct.BrosShopTitle,
+                            Quantity = item.Quantity,
+                            SizeId = item.SizeId, // Добавляем SizeId
+                            UnitPrice = productAttribute.BrosShopProduct.BrosShopPrice,
+                            TotalPrice = productAttribute.BrosShopProduct.BrosShopPrice * item.Quantity
+                        });
+                    }
+                    else
+                    {
+                        return Json(new { success = false, message = $"Продукт с ID {item.ProductId} и размером {item.SizeId} не найден." });
+                    }
+                }
+
+                // Сохраняем изменения для составных частей заказа
+                await _context.SaveChangesAsync();
+
+                // Удаляем корзину из куки
+                Response.Cookies.Delete(CartCookieKey);
+
+                // Перенаправляем на страницу подтверждения заказа с деталями
+                return View("OrderConfirmation", orderDetails); // Передаем orderDetails для отображения
             }
+           
 
-            // Сохраняем изменения для составных частей заказа
-            await _context.SaveChangesAsync();
 
-            // Удаляем корзину из куки
-            Response.Cookies.Delete(CartCookieKey);
-
-            // Перенаправляем на страницу подтверждения заказа с деталями
-            return View("OrderConfirmation", orderDetails);
-        }
 
         public IActionResult OrderConfirmation()
         {
@@ -239,10 +245,10 @@ namespace WebApp2.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult RemoveFromCart(int productId)
+        public IActionResult RemoveFromCart(int productId, int sizeId)
         {
             var cartItems = GetCartFromCookies();
-            var itemToRemove = cartItems.FirstOrDefault(item => item.ProductId == productId);
+            var itemToRemove = cartItems.FirstOrDefault(item => item.ProductId == productId && item.SizeId == sizeId);
             if (itemToRemove != null)
             {
                 cartItems.Remove(itemToRemove);
@@ -251,6 +257,7 @@ namespace WebApp2.Controllers
             SaveCartToCookies(cartItems);
             return RedirectToAction("Index");
         }
+
     }
 }
 

@@ -136,9 +136,11 @@ public partial class ApplicationContext : DbContext
 
         modelBuilder.Entity<BrosShopOrderComposition>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("BrosShop_OrderComposition");
+            // Указываем составной ключ
+            entity.HasKey(oc => new { oc.BrosShopOrderId, oc.BrosShopAttributesId });
+
+            // Указываем имя таблицы
+            entity.ToTable("BrosShop_OrderComposition");
 
             entity.HasIndex(e => e.BrosShopAttributesId, "BrosShop_OrderComposition_ibfk_1_idx");
 
@@ -163,6 +165,8 @@ public partial class ApplicationContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("BrosShop_OrderComposition_ibfk_2");
         });
+        
+       
 
         modelBuilder.Entity<BrosShopProduct>(entity =>
         {

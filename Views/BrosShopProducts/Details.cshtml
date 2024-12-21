@@ -125,7 +125,6 @@
             <div id="message" style="display:none;"></div>
         </form>
 
-        <div id="remainingQuantity" class="mt-2">Осталось добавить: 100 единиц.</div>
 
         <div id="message" style="display:none;"></div>
 
@@ -153,7 +152,7 @@
                     $.ajax({
                         url: '@Url.Action("AddToCart", "BrosShopCart")', // URL для добавления товара
                         type: 'POST',
-                        data: { productId: productId, quantity: quantity, sizeId: sizeId },
+                        data: { productId: productId, quantity: quantity, sizeId: sizeId }, // Передаем sizeId
                         success: function (response) {
                             $('#message').text(response.message).show(); // Показываем сообщение
                             updateCartInfo(sizeId); // Обновляем информацию о корзине с учетом размера
@@ -191,12 +190,20 @@
                     });
                 }
 
+                // Обработчик изменения радиокнопок
+                $(document).on('change', 'input[name="sizeId"]', function () {
+                    var selectedSizeId = $(this).val(); // Получаем выбранный sizeId
+                    updateCartInfo(selectedSizeId); // Обновляем информацию о корзине
+                });
+
                 // Инициализация информации о корзине при загрузке страницы
-                // Предполагаем, что размер по умолчанию не выбран, поэтому передаем null
-                updateCartInfo(null);
+                // Получаем первый доступный sizeId
+                var firstSizeId = $('input[name="sizeId"]:first').val();
+                if (firstSizeId) {
+                    updateCartInfo(firstSizeId); // Обновляем информацию о корзине с первым размером
+                }
             });
         </script>
-
     </div>
 </div>
 
