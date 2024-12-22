@@ -37,106 +37,12 @@ namespace WebApp2.Controllers
             }
 
             var brosShopProduct = await _context.BrosShopProducts
-            .Include(b => b.BrosShopCategory)
-            .Include(p => p.BrosShopImages) // Загружаем все изображения
-            .FirstOrDefaultAsync(m => m.BrosShopProductId == id);
-
-            if (brosShopProduct == null)
-            {
-                return NotFound();
-            }
-
-            return View(brosShopProduct);
-        }
-
-        // GET: BrosShopProducts/Create
-        public IActionResult Create()
-        {
-            ViewData["BrosShopCategoryId"] = new SelectList(_context.BrosShopCategories, "BrosShopCategoryId", "BrosShopCategoryId");
-            return View();
-        }
-
-        // POST: BrosShopProducts/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("BrosShopProductId,BrosShopPrice,BrosShopTitle,BrosShopDiscountPercent,BrosShopWbarticul,BrosShopDescription,BrosShopCategoryId,BrosShopPurcharesePrice")] BrosShopProduct brosShopProduct)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(brosShopProduct);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["BrosShopCategoryId"] = new SelectList(_context.BrosShopCategories, "BrosShopCategoryId", "BrosShopCategoryId", brosShopProduct.BrosShopCategoryId);
-            return View(brosShopProduct);
-        }
-
-        // GET: BrosShopProducts/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var brosShopProduct = await _context.BrosShopProducts.FindAsync(id);
-            if (brosShopProduct == null)
-            {
-                return NotFound();
-            }
-            ViewData["BrosShopCategoryId"] = new SelectList(_context.BrosShopCategories, "BrosShopCategoryId", "BrosShopCategoryId", brosShopProduct.BrosShopCategoryId);
-            return View(brosShopProduct);
-        }
-
-        // POST: BrosShopProducts/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("BrosShopProductId,BrosShopPrice,BrosShopTitle,BrosShopDiscountPercent,BrosShopWbarticul,BrosShopDescription,BrosShopCategoryId,BrosShopPurcharesePrice")] BrosShopProduct brosShopProduct)
-        {
-            if (id != brosShopProduct.BrosShopProductId)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(brosShopProduct);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!BrosShopProductExists(brosShopProduct.BrosShopProductId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["BrosShopCategoryId"] = new SelectList(_context.BrosShopCategories, "BrosShopCategoryId", "BrosShopCategoryId", brosShopProduct.BrosShopCategoryId);
-            return View(brosShopProduct);
-        }
-
-        // GET: BrosShopProducts/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var brosShopProduct = await _context.BrosShopProducts
-                .Include(b => b.BrosShopCategory)
+                .Include(b => b.BrosShopCategory) // Загружаем категорию
+                .Include(p => p.BrosShopImages) // Загружаем все изображения
+                .Include(p => p.BrosShopProductAttributes) // Загружаем атрибуты продукта
+                    .ThenInclude(pa => pa.BrosShopSizeNavigation) // Загружаем размеры
                 .FirstOrDefaultAsync(m => m.BrosShopProductId == id);
+
             if (brosShopProduct == null)
             {
                 return NotFound();
@@ -144,6 +50,7 @@ namespace WebApp2.Controllers
 
             return View(brosShopProduct);
         }
+
 
         // POST: BrosShopProducts/Delete/5
         [HttpPost, ActionName("Delete")]
@@ -167,7 +74,7 @@ namespace WebApp2.Controllers
 
 
         [HttpPost]
-        public IActionResult AddToCart(int productId, int quantity)
+        public IActionResult AddToCart(int productId, int quantity, int sizeId) // Change size parameter to sizeId
         {
             if (quantity <= 0)
             {
@@ -175,22 +82,24 @@ namespace WebApp2.Controllers
             }
 
             var cartItems = GetCartFromCookies();
-            var existingItem = cartItems.FirstOrDefault(i => i.ProductId == productId);
+            var existingItem = cartItems.FirstOrDefault(i => i.ProductId == productId && i.SizeId == sizeId); // Check for existing item with the same sizeId
 
             if (existingItem != null)
             {
-                existingItem.Quantity += quantity; // Увеличиваем количество, если товар уже в корзине
+                existingItem.Quantity += quantity; // Increase quantity if item already in cart
             }
             else
             {
-                cartItems.Add(new CartItem { ProductId = productId, Quantity = quantity }); // Добавляем новый товар
+                cartItems.Add(new CartItem { ProductId = productId, Quantity = quantity, SizeId = sizeId }); // Add new item with sizeId
             }
 
             SaveCartToCookies(cartItems);
 
-            // Возвращаем JSON-ответ
+            // Return JSON response
             return Json(new { success = true, message = "Товар добавлен в корзину!" });
         }
+
+
         private List<CartItem> GetCartFromCookies()
         {
             if (Request.Cookies.TryGetValue(CartCookieKey, out var cookieValue))
