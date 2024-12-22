@@ -35,27 +35,41 @@ else
                 var product = Model.Products.FirstOrDefault(p => p.BrosShopProductId == item.ProductId);
                 if (product != null)
                 {
+                    // Проверяем наличие размера
+                    var sizeAttribute = product.BrosShopProductAttributes?.FirstOrDefault(a => a.BrosShopSizeNavigation != null && a.BrosShopSizeNavigation.SizeId == item.SizeId);
+                    if (sizeAttribute == null)
+                    {
+                        // Если размер не указан, удаляем товар из корзины
+                        <script>
+                            $(document).ready(function () {
+                                $.ajax({
+                                    url: '@Url.Action("RemoveFromCart", "BrosShopCart")',
+                                    type: 'POST',
+                                    data: {
+                                        productId: '@item.ProductId',
+                                        sizeId: '@item.SizeId'
+                                    },
+                                    success: function (response) {
+                                        if (response.success) {
+                                            // Обновляем корзину после удаления
+                                            location.reload(); // Перезагружаем страницу, чтобы обновить отображение корзины
+                                        } else {
+                                            alert(response.message);
+                                        }
+                                    },
+                                    error: function () {
+                                        alert('Произошла ошибка при удалении товара из корзины. Пожалуйста, попробуйте еще раз.');
+                                    }
+                                });
+                            });
+                        </script>
+                        continue; // Пропускаем итерацию, так как товар был удален
+                    }
+
                     decimal itemTotalPrice = product.BrosShopPrice * item.Quantity;
                     <tr>
                         <td>@product.BrosShopTitle</td>
-                        <td>
-                            @if (product.BrosShopProductAttributes != null && product.BrosShopProductAttributes.Any())
-                            {
-                                var sizeAttribute = product.BrosShopProductAttributes.FirstOrDefault(a => a.BrosShopSizeNavigation != null && a.BrosShopSizeNavigation.SizeId == item.SizeId);
-                                if (sizeAttribute != null)
-                                {
-                                    @sizeAttribute.BrosShopSizeNavigation.Size
-                                }
-                                else
-                                {
-                                    <span>Размер не указан</span>
-                                }
-                            }
-                            else
-                            {
-                                <span>Размеры не доступны</span>
-                            }
-                        </td>
+                        <td>@sizeAttribute.BrosShopSizeNavigation.Size</td>
                         <td>@product.BrosShopPrice.ToString("F2") ₽</td>
                         <td>
                             <div class="input-group" style="display: flex; align-items: center; justify-content: center; width: 138px;">
