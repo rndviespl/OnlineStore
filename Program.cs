@@ -15,7 +15,7 @@ namespace WebApp2
                 .Build();
 
             var apiString = _configuration["ApiSettings:AuthUrl"];
-           
+
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddHttpClient<AuthService>(client =>

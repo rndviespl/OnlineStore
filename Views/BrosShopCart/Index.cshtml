@@ -2,7 +2,11 @@
 @model WebApp2.Models.CartViewModel
 @{
     ViewData["Title"] = "Корзина";
-    decimal totalAmount = 0; // Объявляем переменную для хранения общей суммы
+    decimal totalAmount = Model.CartItems.Sum(item => 
+    {
+        var product = Model.Products.FirstOrDefault(p => p.BrosShopProductId == item.ProductId);
+        return product != null ? product.BrosShopPrice * item.Quantity : 0;
+    }); // Объявляем переменную для хранения общей суммы
 }
 
 <h2>Корзина</h2>
@@ -18,6 +22,7 @@ else
         <thead>
             <tr>
                 <th>Товар</th>
+                <th>Размер</th>
                 <th>Цена за штуку</th>
                 <th>Количество</th>
                 <th>Цена за все</th>
@@ -30,22 +35,54 @@ else
                 var product = Model.Products.FirstOrDefault(p => p.BrosShopProductId == item.ProductId);
                 if (product != null)
                 {
+                    // Проверяем наличие размера
+                    var sizeAttribute = product.BrosShopProductAttributes?.FirstOrDefault(a => a.BrosShopSizeNavigation != null && a.BrosShopSizeNavigation.SizeId == item.SizeId);
+                    if (sizeAttribute == null)
+                    {
+                        // Если размер не указан, удаляем товар из корзины
+                        <script>
+                            $(document).ready(function () {
+                                $.ajax({
+                                    url: '@Url.Action("RemoveFromCart", "BrosShopCart")',
+                                    type: 'POST',
+                                    data: {
+                                        productId: '@item.ProductId',
+                                        sizeId: '@item.SizeId'
+                                    },
+                                    success: function (response) {
+                                        if (response.success) {
+                                            // Обновляем корзину после удаления
+                                            location.reload(); // Перезагружаем страницу, чтобы обновить отображение корзины
+                                        } else {
+                                            alert(response.message);
+                                        }
+                                    },
+                                    error: function () {
+                                        alert('Произошла ошибка при удалении товара из корзины. Пожалуйста, попробуйте еще раз.');
+                                    }
+                                });
+                            });
+                        </script>
+                        continue; // Пропускаем итерацию, так как товар был удален
+                    }
+
                     decimal itemTotalPrice = product.BrosShopPrice * item.Quantity;
-                    totalAmount += itemTotalPrice;
                     <tr>
                         <td>@product.BrosShopTitle</td>
-                        <td>@product.BrosShopPrice.ToString("F2", CultureInfo.InvariantCulture)</td>
+                        <td>@sizeAttribute.BrosShopSizeNavigation.Size</td>
+                        <td>@product.BrosShopPrice.ToString("F2") ₽</td>
                         <td>
                             <div class="input-group" style="display: flex; align-items: center; justify-content: center; width: 138px;">
-                                <button type="button" class="btn btn-secondary" style="width: 30px;" onclick="changeQuantity('@item.ProductId', -1)">-</button>
-                                <input type="number" id="quantity-@item.ProductId" name="quantity" value="@item.Quantity" min="1" max="254" step="1" class="form-control" style="width: 40px; text-align: center; margin: 0 5px;" readonly />
-                                <button type="button" class="btn btn-secondary" style="width: 30px;" onclick="changeQuantity('@item.ProductId', 1)">+</button>
+                                <button type="button" class="btn btn-secondary" style="width: 30px;" onclick="changeQuantity('@item.ProductId', '@item.SizeId', -1)">-</button>
+                                <input type="number" id="quantity-@item.ProductId-@item.SizeId" name="quantity" value="@item.Quantity" min="1" max="100" step="1" class="form-control" style="width: 40px; text-align: center; margin: 0 5px;" readonly />
+                                <button type="button" class="btn btn-secondary" style="width: 30px;" onclick="changeQuantity('@item.ProductId', '@item.SizeId', 1)">+</button>
                             </div>
                         </td>
-                        <td id="price-@item.ProductId" data-original-price="@product.BrosShopPrice.ToString("F2", CultureInfo.InvariantCulture)">@itemTotalPrice.ToString("C", CultureInfo.CurrentCulture)</td>
+                        <td id="price-@item.ProductId-@item.SizeId" data-original-price="@product.BrosShopPrice.ToString("F2")">@itemTotalPrice.ToString("C") </td>
                         <td>
                             <form asp-action="RemoveFromCart" method="post" style="display:inline;">
                                 <input type="hidden" name="productId" value="@item.ProductId" />
+                                <input type="hidden" name="sizeId" value="@item.SizeId" />
                                 <button type="submit" class="btn btn-danger">Удалить</button>
                             </form>
                         </td>
@@ -55,7 +92,7 @@ else
         </tbody>
     </table>
 
-    <h4>Сумма к оплате: <span id="totalAmount">@totalAmount.ToString("C", CultureInfo.CurrentCulture)</span></h4>
+    <h4>Сумма к оплате: <span id="totalAmount">@totalAmount.ToString("F2")</span> ₽</h4>
 
     @if (!Context.Request.Cookies.ContainsKey("Token"))
     {
@@ -72,9 +109,10 @@ else
         </form>
     }
 }
+
 <script>
-    function changeQuantity(productId, change) {
-        var quantityInput = document.getElementById('quantity-' + productId);
+    function changeQuantity(productId, sizeId, change) {
+        var quantityInput = document.getElementById('quantity-' + productId + '-' + sizeId);
         var currentQuantity = parseInt(quantityInput.value);
 
         // Рассчитываем новое количество
@@ -83,36 +121,37 @@ else
         // Проверяем, чтобы новое количество было в пределах 1-100
         if (newQuantity >= 1 && newQuantity <= 100) {
             quantityInput.value = newQuantity;
-            updateCart(productId, newQuantity); // Обновляем корзину на сервере
+            updateCart(productId, sizeId, newQuantity); // Обновляем корзину на сервере
         }
     }
 
-    function updateCart(productId, quantity) {
+    function updateCart(productId, sizeId, quantity) {
         $.ajax({
             url: '@Url.Action("UpdateCart", "BrosShopCart")',
             type: 'POST',
             data: {
                 productId: productId,
+                sizeId: sizeId,
                 quantity: quantity
             },
             success: function (response) {
                 if (response.success) {
-                    console.log("Корзина обновлена!");
-    // Обновляем отображение цены и общей суммы
-                    updatePriceDisplay(productId, quantity); // Обновляем отображение цены
+                    // Если обновление прошло успешно, обновляем отображение цены
+                    updatePriceDisplay(productId, sizeId, quantity);
                     updateTotalAmount(); // Обновляем общую сумму
                 } else {
+                    // Если произошла ошибка, показываем сообщение пользователю
                     alert(response.message);
                 }
             },
             error: function () {
-                alert("Произошла ошибка при обновлении корзины.");
+                alert('Произошла ошибка при обновлении корзины. Пожалуйста, попробуйте еще раз.');
             }
         });
     }
 
-    function updatePriceDisplay(productId, quantity) {
-        var priceCell = document.getElementById('price-' + productId);
+    function updatePriceDisplay(productId, sizeId, quantity) {
+        var priceCell = document.getElementById('price-' + productId + '-' + sizeId);
         var originalPrice = parseFloat(priceCell.getAttribute('data-original-price')); // Извлекаем исходную цену из атрибута
         var newPrice = originalPrice * quantity; // Рассчитываем новую цену
         priceCell.innerText = newPrice.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' }); // Форматируем цену
@@ -126,10 +165,8 @@ else
             var quantityInput = row.querySelector('input[name="quantity"]'); // Получаем поле ввода количества
 
             if (priceCell && quantityInput) {
-                // Извлекаем общую цену для товара, удаляя все символы, кроме цифр и точки
+                // Извлекаем общую цену для товара
                 var itemTotalPrice = parseFloat(priceCell.innerText.replace(/[^0-9,.-]+/g, "").replace(",", "."));
-                // Удаляем лишние нули после запятой
-                itemTotalPrice = parseFloat(itemTotalPrice.toFixed(2)); // Оставляем только 2 знака после запятой
                 var quantity = parseInt(quantityInput.value); // Получаем текущее количество
                 totalAmount += itemTotalPrice; // Суммируем общую стоимость
             }
@@ -138,3 +175,4 @@ else
         totalAmountDisplay.innerText = totalAmount.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' }); // Форматируем общую сумму
     }
 </script>
+

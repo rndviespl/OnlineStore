@@ -16,10 +16,14 @@ body {
     transition: background-color 0.3s, color 0.3s; /* Плавный переход */
 }
 
-    /* Светлая тема */
     body.light-theme {
-        background-color: #f8f9fa; /* Светлый фон */
+        background: linear-gradient(135deg, #e0e0e0, #b0b0b0);
         color: #000; /* Черный текст */
+    }
+
+    body.dark-theme {
+        background: linear-gradient(135deg, #4b0082, #000000);
+        color: #f8f9fa; /* Светлый текст */
     }
 
 .navbar {
@@ -27,12 +31,15 @@ body {
     border-bottom: 1px solid #ddd; /* Граница навигации */
 }
 
-.nav-link {
+.nav-link,
+.dropdown-item {
     color: #000; /* Цвет ссылок */
 }
 
-    .nav-link:hover {
+    .nav-link:hover,
+    .dropdown-item:hover {
         text-decoration: underline; /* Эффект при наведении */
+        background-color: #e9ecef; /* Цвет фона при наведении в светлой теме */
     }
 
 .card {
@@ -44,44 +51,21 @@ body {
     overflow: hidden; /* Скрывает переполнение, чтобы скругление работало */
 }
 
-.dropdown-item {
-    color: #000; /* Цвет ссылок в светлой теме */
+body.dark-theme .navbar {
+    background-color: #495057; /* Темный фон навигации */
+    border-bottom: 1px solid #6c757d; /* Граница навигации */
 }
 
-    .dropdown-item:hover {
-        background-color: #e9ecef; /* Цвет фона при наведении в светлой теме */
-    }
-
-/* Темная тема */
-body.dark-theme {
-    background-color: #343a40; /* Темный фон */
-    color: #f8f9fa; /* Светлый текст */
+body.dark-theme .nav-link,
+body.dark-theme .dropdown-item {
+    color: #f8f9fa; /* Светлый цвет ссылок */
 }
 
-    body.dark-theme .navbar {
-        background-color: #495057; /* Темный фон навигации */
-        border-bottom: 1px solid #6c757d; /* Граница навигации */
-    }
+body.dark-theme .card {
+    border: 1px solid #6c757d; /* Темная граница для карточек */
+    background-color: #495057; /* Темный фон карточек */
+}
 
-    body.dark-theme .nav-link {
-        color: #f8f9fa; /* Светлый цвет ссылок */
-    }
-
-    /* Карточки в темной теме */
-    body.dark-theme .card {
-        border: 1px solid #6c757d; /* Темная граница для карточек */
-        background-color: #495057; /* Темный фон карточек */
-    }
-
-    body.dark-theme .dropdown-item {
-        color: #f8f9fa; /* Цвет ссылок в темной теме */
-    }
-
-        body.dark-theme .dropdown-item:hover {
-            background-color: #6c757d; /* Цвет фона при наведении в темной теме */
-        }
-
-/* Стили для кнопок */
 .btn {
     border-radius: 0.25rem; /* Закругленные углы для кнопок */
     transition: background-color 0.3s, color 0.3s; /* Плавный переход для фона и цвета текста */
@@ -94,31 +78,33 @@ body.dark-theme {
 
     .btn-primary:hover {
         background-color: #1a6bbd; /* Темный цвет при наведении */
-        color: white; /* Цвет текста при наведении */
     }
 
 body.dark-theme .btn-primary {
     background-color: #007bff; /* Цвет кнопок в темной теме */
 }
 
-.fixed-image-container {
+.fixed-image-container,
+.image-container {
     width: 100%;
+    border-radius: 0.5rem; /* Закругленные углы для контейнера изображения */
+}
+
+.fixed-image-container {
     height: 450px; /* Фиксированная высота контейнера */
     overflow: hidden; /* Скрывает любые части изображения, выходящие за пределы контейнера */
     position: relative; /* Устанавливает контекст для абсолютного позиционирования */
     padding: 10px; /* Добавьте отступы вокруг изображения */
     box-sizing: border-box; /* Учитывает отступы в общей ширине и высоте */
-    border-radius: 0.5rem; /* Закругленные углы для контейнера изображения */
 }
+
 .image-container {
-    width: 100%; /* Ширина контейнера 100% */
     height: 600px; /* Фиксированная высота контейнера */
-    overflow: hidden; /* Скрывает любые части изображения, выходящие за пределы контейнера */
     display: flex; /* Используем Flexbox для центрирования */
     justify-content: center; /* Центрируем изображение по горизонтали */
     align-items: center; /* Центрируем изображение по вертикали */
-    border-radius: 0.5rem; /* Закругленные углы для контейнера изображения */
 }
+
 .fixed-image {
     width: 100%; /* Ширина изображения 100% */
     height: 100%; /* Высота изображения равна высоте контейнера */
@@ -127,7 +113,9 @@ body.dark-theme .btn-primary {
     border-radius: 0.5rem; /* Закругленные углы для изображения */
     margin: -10px; /* Убираем отрицательный отступ, чтобы изображение заполнило контейнер */
 }
-.carousel-control-prev, .carousel-control-next {
+
+.carousel-control-prev,
+.carousel-control-next {
     position: absolute; /* Позиционируем кнопки абсолютно */
     bottom: 10px; /* Устанавливаем отступ от нижней части контейнера */
     z-index: 1; /* Устанавливаем z-index, чтобы кнопки были выше изображения */
@@ -197,79 +185,71 @@ body.dark-theme .form-control {
     border: 1px solid #6c757d; /* Темная граница для полей ввода */
 }
 
-/* Темная тема */
-body.dark-theme .cart-table {
-    background-color: #495057; /* Светлый фон для таблицы в темной теме */
-    color: #f8f9fa; /* Светлый текст */
-}
-
-    body.dark-theme .cart-table th {
-        background-color: #6c757d; /* Фон заголовков таблицы */
-        color: #f8f9fa; /* Цвет текста заголовков */
-    }
-
-    body.dark-theme .cart-table td {
-        background-color: #343a40; /* Фон ячеек таблицы */
-        color: #f8f9fa; /* Цвет текста ячеек */
-    }
-/* Темная тема */
-body.dark-theme .order-table {
+/* Стили для таблиц */
+body.dark-theme .cart-table,
+body.dark-theme .order-table,
+body.light-theme .order-table {
     background-color: #495057; /* Фон таблицы в темной теме */
     color: #f8f9fa; /* Цвет текста */
 }
 
-    body.dark-theme .order-table th {
-        background-color: #6c757d; /* Фон заголовков таблицы */
-        color: #f8f9fa; /* Цвет текста заголовков */
-    }
-
-    body.dark-theme .order-table td {
-        background-color: #343a40; /* Фон ячеек таблицы */
-        color: #f8f9fa; /* Цвет текста ячеек */
-    }
-
-/* Дополнительные стили для улучшения читаемости */
-body.dark-theme .order-table {
-    border: 1px solid #6c757d; /* Граница таблицы */
-}
-
-    body.dark-theme .order-table th,
-    body.dark-theme .order-table td {
-        border: 1px solid #6c757d; /* Границы ячеек */
-    }
-
-/* Стили для светлой темы (если необходимо) */
 body.light-theme .order-table {
     background-color: #ffffff; /* Фон таблицы в светлой теме */
     color: #000; /* Цвет текста */
 }
 
+    .cart-table th,
+    .order-table th,
     body.light-theme .order-table th {
-        background-color: #f8f9fa; /* Фон заголовков таблицы */
-        color: #000; /* Цвет текста заголовков */
+        background-color: #6c757d; /* Фон заголовков таблицы */
+        color: #f8f9fa; /* Цвет текста заголовков */
+    }
+
+    body.light-theme .order-table th {
+        background-color: #f8f9fa; /* Фон заголовков таблицы в светлой теме */
+        color: #000; /* Цвет текста заголовков в светлой теме */
+    }
+
+    .cart-table td,
+    .order-table td,
+    body.light-theme .order-table td {
+        background-color: #343a40; /* Фон ячеек таблицы в темной теме */
+        color: #f8f9fa; /* Цвет текста ячеек в темной теме */
     }
 
     body.light-theme .order-table td {
-        background-color: #ffffff; /* Фон ячеек таблицы */
-        color: #000; /* Цвет текста ячеек */
+        background-color: #ffffff; /* Фон ячеек таблицы в светлой теме */
+        color: #000; /* Цвет текста ячеек в светлой теме */
     }
 
-    body.light-theme .order-table th,
-    body.light-theme .order-table td {
-        border: 1px solid #dee2e6; /* Границы ячеек в светлой теме */
+body.dark-theme .order-table,
+body.dark-theme .cart-table {
+    border: 1px solid #6c757d; /* Граница таблицы */
+}
+
+    body.dark-theme .order-table th,
+    body.dark-theme .order-table td,
+    body.dark-theme .cart-table th,
+    body.dark-theme .cart-table td {
+        border: 1px solid #6c757d; /* Границы ячеек */
     }
 
-
-/* Темная тема */
+/* Стили для заголовков в темной теме */
 body.dark-theme h1,
 body.dark-theme h2,
 body.dark-theme h3,
-body.dark-theme h4
+body.dark-theme h4,
 body.dark-theme p,
 body.dark-theme ul,
 body.dark-theme li {
     color: #f8f9fa; /* Светлый цвет для заголовков */
 }
+
+h1, h2, h3, h4, h5, h6 {
+    color: #000; /* Черный цвет заголовков */
+    margin-bottom: 1rem; /* Отступ снизу для заголовков */
+}
+
 body.dark-theme h4 {
     color: #f8f9fa; /* Белый цвет для заголовка h4 в темной теме */
 }
@@ -278,30 +258,21 @@ body.dark-theme .card-body {
     color: #f8f9fa; /* Светлый цвет текста в карточке в темной теме */
 }
 
-    body.dark-theme .card-body h5.card-title {
-        color: #f8f9fa; /* Светлый цвет заголовка в карточке в темной теме */
+    body.dark-theme .card-body h5.card-title,
+    body.dark-theme .card-body p {
+        color: #f8f9fa; /* Светлый цвет для заголовков и параграфов в карточке в темной теме */
     }
 
-    body.dark-theme .card-body p {
-        color: #f8f9fa; /* Светлый цвет для параграфов в карточке в темной теме */
-    }
-/* Если нужно, можно добавить дополнительные стили для других заголовков */
+/* Отступы для заголовков */
 body.dark-theme h2 {
     margin-bottom: 1rem; /* Отступ снизу для заголовка h2 */
 }
 
-body.dark-theme h3 {
-    margin-bottom: 0.5rem; /* Отступ снизу для заголовка h3 */
-}
-
+body.dark-theme h3,
 body.dark-theme h4 {
-    margin-bottom: 0.5rem; /* Отступ снизу для заголовка h4 */
+    margin-bottom: 0.5rem; /* Отступ снизу для заголовков h3 и h4 */
 }
 
-h1, h2, h3, h4, h5, h6 {
-    color: #000; /* Черный цвет заголовков */
-    margin-bottom: 1rem; /* Отступ снизу для заголовков */
-}
 .accordion {
     margin: 20px 0;
 }
@@ -314,50 +285,47 @@ h1, h2, h3, h4, h5, h6 {
         margin: 0;
     }
 
-/* Стили для темной темы */
-.dark-theme .accordion h3 {
-    background-color: #333; /* Темный фон */
-    color: #fff; /* Белый текст */
-    border: 1px solid #555; /* Темная граница */
+/* Стили для светлой темы кнопок */
+body.light-theme .btn-outline-primary,
+body.light-theme .btn-group-toggle .btn-outline-primary {
+    border-color: #258cfb; /* Цвет границы */
+    color: #258cfb; /* Цвет текста */
+    background-color: transparent; /* Прозрачный фон */
 }
 
-    .dark-theme .accordion h3:hover {
-        background-color: #444; /* Цвет при наведении */
+    body.light-theme .btn-outline-primary:hover,
+    body.light-theme .btn-group-toggle .btn-outline-primary:hover,
+    body.light-theme .btn-group-toggle .btn-outline-primary:active {
+        background-color: #7fc7ff; /* Цвет фона при наведении и нажатии */
+        color: #fff; /* Цвет текста при наведении и нажатии */
     }
 
-.toggle-button {
-    cursor: pointer;
-    background-color: #007bff; /* Цвет фона кнопки */
-    color: white; /* Цвет текста */
-    padding: 10px 15px; /* Отступы */
-    border: none; /* Убираем границу */
-    border-radius: 5px; /* Закругленные углы */
-    text-align: center; /* Центрируем текст */
-    display: inline-block; /* Делаем элемент блочным для отступов */
-    transition: background-color 0.3s; /* Плавный переход цвета фона */
+/* Стили для темной темы кнопок */
+body.dark-theme .btn-outline-primary,
+body.dark-theme .btn-group-toggle .btn-outline-primary {
+    border-color: #6c757d; /* Цвет границы */
+    color: #f8f9fa; /* Светлый цвет текста */
+    background-color: transparent; /* Прозрачный фон */
 }
 
-    .toggle-button:hover {
-        background-color: #0056b3; /* Цвет фона при наведении */
+    body.dark-theme .btn-outline-primary:hover,
+    body.dark-theme .btn-group-toggle .btn-outline-primary:hover,
+    body.dark-theme .btn-group-toggle .btn-outline-primary:active {
+        background-color: #495057; /* Цвет фона при наведении и нажатии */
+        color: #fff; /* Цвет текста при наведении и нажатии */
     }
-/* Стили для темной темы */
-.dark-theme .toggle-button {
-    background-color: #444; /* Цвет фона кнопки в темной теме */
-    color: #fff; /* Цвет текста в темной теме */
-}
 
-    .dark-theme .toggle-button:hover {
-        background-color: #666; /* Цвет фона при наведении в темной теме */
-    }
 .panel {
     display: none;
     padding: 0 10px;
     border: 1px solid #ccc;
     border-top: none;
 }
+
 /* Адаптивные стили */
 @media (max-width: 576px) {
     .card {
         margin-bottom: 1rem; /* Отступ между карточками на мобильных устройствах */
     }
 }
+

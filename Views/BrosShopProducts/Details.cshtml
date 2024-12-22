@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
 <!-- Подключение jQuery и Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
 <h1>@Model.BrosShopTitle</h1>
@@ -58,105 +58,166 @@
         </div>
     </div>
 
-
     <div class="col-md-6">
-        <div class="col-md-8">
-            <!-- Измените на col-md-8 или col-md-12 -->
-            <h4>Детали товара</h4>
+        <div class="details-container">
+            <h4 style="font-size: 1.5rem; margin-bottom: 20px;">Детали товара</h4>
             <dl class="row">
                 <dt class="col-sm-4 mb-2">
-                    <strong>Цена:</strong>
+                    <strong style="font-size: 1.4rem;">Цена:</strong>
                 </dt>
-                <dd class="col-sm-8 mb-2">
+                <dd class="col-sm-8 mb-2" style="font-size: 1.4rem;">
                     @Html.DisplayFor(model => model.BrosShopPrice)
                 </dd>
+
                 <dt class="col-sm-4 mb-2">
-                    <strong>Скидка (%):</strong>
+                    <strong style="font-size: 1.4rem;">Категория:</strong>
                 </dt>
-                <dd class="col-sm-8 mb-2">
-                    @Html.DisplayFor(model => model.BrosShopDiscountPercent)
-                </dd>
-                <dt class="col-sm-4 mb-2">
-                    <strong>Артикул:</strong>
-                </dt>
-                <dd class="col-sm-8 mb-2">
-                    @Html.DisplayFor(model => model.BrosShopWbarticul)
-                </dd>
-                <dt class="col-sm-4 mb-2">
-                    <strong>Категория:</strong>
-                </dt>
-                <dd class="col-sm-8 mb-2">
-                    @Html.DisplayFor(model => model.BrosShopCategory.BrosShopCategoryId)
+                <dd class="col-sm-8 mb-2" style="font-size: 1.3rem;">
+                    @Html.DisplayFor(model => model.BrosShopCategory.BrosShopCategoryTitle)
                 </dd>
             </dl>
-            <h4>Описание</h4>
-            <p>
+            <h4 style="font-size: 1.5rem; margin-top: 20px;">Описание</h4>
+            <p style="font-size: 1.2rem;">
                 @Html.DisplayFor(model => model.BrosShopDescription)
             </p>
-        </div>
-         <!-- Форма для добавления товара в корзину -->
+            <div>
+                <h4 style="font-size: 1.5rem; margin-bottom: 10px;">Размеры</h4>
+                @if (Model.BrosShopProductAttributes != null && Model.BrosShopProductAttributes.Any())
+                {
+                    <div class="btn-group-toggle" data-toggle="buttons">
+                        @foreach (var attribute in Model.BrosShopProductAttributes)
+                        {
+                            if (attribute.BrosShopSizeNavigation != null)
+                            {
+                                <label class="btn btn-outline-primary">
+                                    <input class="form-check-input" type="radio" name="sizeId" id="size_@(attribute.BrosShopSizeNavigation.SizeId)" value="@(attribute.BrosShopSizeNavigation.SizeId)" required />
+                                    Размер @(attribute.BrosShopSizeNavigation.Size)
+                                </label>
+                            }
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p>Размеры не доступны.</p>
+                }
+            </div>
+
+        <!-- Форма для добавления товара в корзину -->
         <form id="addToCartForm" asp-action="AddToCart" method="post">
             <input type="hidden" name="productId" value="@Model.BrosShopProductId" />
-            <input type="number" name="quantity" value="1" min="1" max="100" step="1" class="form-control" style="width: 100px; display: inline-block;" />
-            <button type="submit" class="btn btn-primary">Добавить в корзину</button>
+
+            <div class="quantity-container" style="margin-top: 20px; display: flex; align-items: center;">
+                <input type="number" name="quantity" value="1" min="1" max="100" step="1" class="form-control quantity-input" style="width: 120px; font-size: 1.2rem; margin-right: 10px;" />
+                <button type="submit" class="btn btn-primary add-to-cart-button" style="font-size: 1.2rem; padding: 10px 20px; height: 70px; display: flex; align-items: center;">Добавить в корзину</button>
+            </div>
+
+            <div id="remainingQuantity" class="mt-2" style="font-size: 1.2rem;">Осталось добавить: 100 единиц.</div>
+            <div id="message" style="display:none;"></div>
         </form>
-        <div id="remainingQuantity" class="mt-2">Осталось добавить: 100 единиц.</div>
+    </div>
 
-        <div id="message" style="display:none;"></div>
+    </div>
 
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script>
-            $(document).ready(function () {
-                // Обработчик для добавления товара в корзину
-                $('#addToCartForm').submit(function (event) {
-                    event.preventDefault(); // Отменяем стандартное поведение формы
+    <script>
+        $(document).ready(function () {
+            // Обработчик для добавления товара в корзину
+            $('#addToCartForm').submit(function (event) {
+                event.preventDefault(); // Отменяем стандартное поведение формы
 
-                    var productId = $('input[name="productId"]').val();
-                    var quantity = parseInt($('input[name="quantity"]').val(), 10);
+                var productId = $('input[name="productId"]').val();
+                var quantity = parseInt($('input[name="quantity"]').val(), 10);
+                var sizeId = $('input[name="sizeId"]:checked').val(); // Получаем выбранный размер
+                var $submitButton = $(this).find('button[type="submit"]');
 
-                    $.ajax({
-                        url: '@Url.Action("AddToCart", "BrosShopCart")', // URL для добавления товара
-                        type: 'POST',
-                        data: { productId: productId, quantity: quantity },
-                        success: function (response) {
-                            $('#message').text(response.message).show(); // Показываем сообщение
-                            updateCartInfo(); // Обновляем информацию о корзине
-                        },
-                        error: function (xhr, status, error) {
-                            $('#message').text('Произошла ошибка: ' + error).show(); // Показываем сообщение об ошибке
-                        }
-                    });
-                });
-
-                // Функция для обновления информации о корзине
-                function updateCartInfo() {
-                    var productId = $('input[name="productId"]').val();
-
-                    // Получаем текущее количество товара в корзине через AJAX
-                    $.ajax({
-                        url: '@Url.Action("GetCartQuantity", "BrosShopCart")', // URL для получения количества товара в корзине
-                        type: 'GET',
-                        data: { productId: productId },
-                        success: function (response) {
-                            var currentQuantity = response.currentQuantity; // Получаем текущее количество из ответа
-                            var maxQuantity = 100;
-                            var remainingQuantity = maxQuantity - currentQuantity;
-
-                            // Обновляем элемент на странице, чтобы показать текущее количество и оставшееся
-                            $('#remainingQuantity').text('В корзине: ' + currentQuantity + '/' + maxQuantity + ' (осталось добавить: ' + remainingQuantity + ' единиц)');
-                        },
-                        error: function (xhr, status, error) {
-                            $('#message').text('Произошла ошибка при получении количества: ' + error).show(); // Показываем сообщение об ошибке
-                        }
-                    });
+                // Проверяем, выбран ли размер
+                if (!sizeId) {
+                    $('#message').text('Пожалуйста, выберите размер.').show();
+                    return;
                 }
 
-                // Инициализация информации о корзине при загрузке страницы
-                updateCartInfo();
+                // Блокируем кнопку, чтобы предотвратить повторные нажатия
+                $submitButton.prop('disabled', true);
+
+                $.ajax({
+                    url: '@Url.Action("AddToCart", "BrosShopCart")', // URL для добавления товара
+                    type: 'POST',
+                    data: { productId: productId, quantity: quantity, sizeId: sizeId }, // Передаем sizeId
+                    success: function (response) {
+                        if (response.success) {
+                            $('#message').text(response.message).show(); // Показываем сообщение
+                            updateCartInfo(sizeId); // Обновляем информацию о корзине с учетом размера
+                        } else {
+                            $('#message').text('Не удалось добавить товар в корзину.').show(); // Обработка ошибки
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        $('#message').text('Произошла ошибка: ' + error).show(); // Показываем сообщение об ошибке
+                    },
+                    complete: function () {
+                        // Включаем кнопку обратно после завершения запроса
+                        $submitButton.prop('disabled', false);
+                    }
+                });
             });
-        </script>
-    </div>
-</div>
+
+            $(document).on('click', '.btn-group-toggle label', function () {
+                console.log("Обработчик события change сработал.");
+                // Используем closest для поиска родительского элемента и find для получения значения
+                var selectedSizeId = $(this).find('input[name="sizeId"]').val(); // Получаем выбранный sizeId
+                console.log("Выбранный размер ID: " + selectedSizeId); // Отладочное сообщение
+
+                if (selectedSizeId) {
+                    console.log("Обновление информации о корзине для размера: " + selectedSizeId);
+                    updateCartInfo(selectedSizeId); // Обновляем информацию о корзине для выбранного размера
+
+                    // Удаляем класс active у всех кнопок и добавляем только к выбранной
+                    $('.btn-group-toggle .btn').removeClass('active focus');
+                    $(this).addClass('active focus');
+                } else {
+                    $('#message').text('Пожалуйста, выберите размер.').show(); // Сообщение, если размер не выбран
+                }
+            });
+
+
+            // Функция для обновления информации о корзине
+            function updateCartInfo(sizeId) {
+                var productId = $('input[name="productId"]').val();
+                console.log("Запрос информации о корзине для productId: " + productId + ", sizeId: " + sizeId);
+                // Получаем текущее количество товара в корзине через AJAX
+                $.ajax({
+                    url: '@Url.Action("GetCartQuantity", "BrosShopCart")', // URL для получения количества товара в корзине
+                    type: 'GET',
+                    data: { productId: productId, sizeId: sizeId }, // Передаем sizeId
+                    cache: false,
+                    success: function (response) {
+                        console.log("Текущая информация о корзине:", response); // Отладочное сообщение
+
+                        // Предполагаем, что response содержит поле currentQuantity
+                        var currentQuantity = response.currentQuantity; // Получаем текущее количество из ответа
+                        var maxQuantity = 100; // Максимальное количество, которое можно добавить
+                        var remainingQuantity = maxQuantity - currentQuantity;
+
+                        // Обновляем элемент на странице, чтобы показать текущее количество и оставшееся
+                        $('#remainingQuantity').text('В корзине: ' + currentQuantity + '/' + maxQuantity + ' (осталось добавить: ' + remainingQuantity + ' единиц)');
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Ошибка при получении количества:', error);
+                        $('#message').text('Произошла ошибка при получении количества: ' + error).show(); // Показываем сообщение об ошибке
+                    }
+                });
+            }
+
+            // Инициализация информации о корзине при загрузке страницы
+            var firstSizeId = $('input[name="sizeId"]:checked').val() || $('input[name="sizeId"]:first').val();
+            if (firstSizeId) {
+                updateCartInfo(firstSizeId); // Обновляем информацию о корзине с первым размером
+            }
+        });
+
+
+    </script>
+
 
 
 
