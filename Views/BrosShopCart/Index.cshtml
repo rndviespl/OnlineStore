@@ -138,6 +138,7 @@ else
                 if (response.success) {
                     // Если обновление прошло успешно, обновляем отображение цены
                     updatePriceDisplay(productId, sizeId, quantity);
+                    console.log("Корзина обновлена!");
                     updateTotalAmount(); // Обновляем общую сумму
                 } else {
                     // Если произошла ошибка, показываем сообщение пользователю

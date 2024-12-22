@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using OfficeOpenXml;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -210,8 +211,9 @@ namespace WebApp2.Controllers
             // Удаляем корзину из куки
             Response.Cookies.Delete(CartCookieKey);
 
-            // Перенаправляем на страницу подтверждения заказа с деталями
-            return View("OrderConfirmation", orderDetails); // Передаем orderDetails для отображения
+            // После создания заказа
+            ViewBag.OrderId = brosShopOrder.BrosShopOrderId; // Убедитесь, что у вас есть свойство OrderId
+            return View("OrderConfirmation", orderDetails);
         }
 
         public IActionResult OrderConfirmation()
@@ -253,6 +255,61 @@ namespace WebApp2.Controllers
 
             SaveCartToCookies(cartItems);
             return RedirectToAction("Index");
+        }
+        [HttpPost]
+        public async Task<IActionResult> ExportToExcel(int orderId)
+        {
+            // Получаем данные о заказе из базы данных с использованием навигационных свойств
+            var orderDetails = await _context.BrosShopOrderCompositions
+                .Include(oc => oc.BrosShopAttributes.BrosShopProduct) // Включаем информацию о продукте
+                .Where(oc => oc.BrosShopOrderId == orderId)
+                .ToListAsync();
+
+            if (orderDetails == null || !orderDetails.Any())
+            {
+                return BadRequest("Нет данных для экспорта.");
+            }
+
+            var excelFile = CreateExcelFile(orderDetails);
+            var fileName = $"Order_{DateTime.UtcNow:yyyyMMddHHmmss}.xlsx";
+            var stream = new MemoryStream();
+            excelFile.SaveAs(stream);
+            stream.Position = 0;
+
+            return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        }
+
+
+        private ExcelPackage CreateExcelFile(List<BrosShopOrderComposition> orderCompositions)
+        {
+            var package = new ExcelPackage();
+            var worksheet = package.Workbook.Worksheets.Add("Order Details");
+
+            // Заголовки
+            worksheet.Cells[1, 1].Value = "Товар";
+            worksheet.Cells[1, 2].Value = "Количество";
+            worksheet.Cells[1, 3].Value = "Цена за единицу";
+            worksheet.Cells[1, 4].Value = "Итоговая стоимость";
+
+            // Заполнение данными
+            for (int i = 0; i < orderCompositions.Count; i++)
+            {
+                var item = orderCompositions[i];
+                worksheet.Cells[i + 2, 1].Value = item.BrosShopAttributes.BrosShopProduct.BrosShopTitle; // Название товара
+                worksheet.Cells[i + 2, 2].Value = item.BrosShopQuantity; // Количество
+                worksheet.Cells[i + 2, 3].Value = item.BrosShopCost; // Цена за единицу
+                worksheet.Cells[i + 2, 4].Value = item.BrosShopCost * item.BrosShopQuantity; // Итоговая стоимость
+            }
+
+            // Форматирование столбцов
+            worksheet.Column(1).AutoFit(); // Автоширина для первого столбца
+            worksheet.Column(2).AutoFit(); // Автоширина для второго столбца
+            worksheet.Column(3).Style.Numberformat.Format = "0.00"; // Формат для цены
+            worksheet.Column(4).Style.Numberformat.Format = "0.00"; // Формат для итоговой стоимости
+            worksheet.Column(3).AutoFit(); // Автоширина для третьего столбца
+            worksheet.Column(4).AutoFit(); // Автоширина для четвертого столбца
+
+            return package;
         }
 
     }

@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using WebApp2.Controllers;
 using WebApp2.Data;
+using OfficeOpenXml;
+using System.ComponentModel;
 
 namespace WebApp2
 {
@@ -32,6 +34,7 @@ namespace WebApp2
                 options.UseMySql(connectionString, Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.39-mysql"));
             });
 
+            ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddSession(options =>
