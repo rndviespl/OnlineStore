@@ -22,11 +22,11 @@ namespace WebApp2
 
             builder.Services.AddHttpClient<AuthService>(client =>
             {
-                client.BaseAddress = new Uri(apiString); // Укажите базовый адрес вашего API
+                client.BaseAddress = new Uri(apiString); // Г“ГЄГ Г¦ГЁГІГҐ ГЎГ Г§Г®ГўГ»Г© Г Г¤Г°ГҐГ± ГўГ ГёГҐГЈГ® API
             });
             builder.Services.AddHttpClient<BrosShopImagesController>();
 
-            // Регистрация ApplicationContext с зависимостями
+            // ГђГҐГЈГЁГ±ГІГ°Г Г¶ГЁГї ApplicationContext Г± Г§Г ГўГЁГ±ГЁГ¬Г®Г±ГІГїГ¬ГЁ
             builder.Services.AddDbContextPool<ApplicationContext>((serviceProvider, options) =>
             {
                 var configuration = serviceProvider.GetRequiredService<IConfiguration>();
@@ -39,9 +39,9 @@ namespace WebApp2
 
             builder.Services.AddSession(options =>
             {
-                options.IdleTimeout = TimeSpan.FromMinutes(30); // Установите время ожидания
-                options.Cookie.HttpOnly = true; // Защитите куки
-                options.Cookie.IsEssential = true; // Сделайте куки обязательными
+                options.IdleTimeout = TimeSpan.FromMinutes(30); // Г“Г±ГІГ Г­Г®ГўГЁГІГҐ ГўГ°ГҐГ¬Гї Г®Г¦ГЁГ¤Г Г­ГЁГї
+                options.Cookie.HttpOnly = true; // Г‡Г Г№ГЁГІГЁГІГҐ ГЄГіГЄГЁ
+                options.Cookie.IsEssential = true; // Г‘Г¤ГҐГ«Г Г©ГІГҐ ГЄГіГЄГЁ Г®ГЎГїГ§Г ГІГҐГ«ГјГ­Г»Г¬ГЁ
             });
 
             var app = builder.Build();

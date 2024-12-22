@@ -280,6 +280,7 @@ namespace WebApp2.Controllers
         }
 
 
+
         private ExcelPackage CreateExcelFile(List<BrosShopOrderComposition> orderCompositions)
         {
             var package = new ExcelPackage();
@@ -295,7 +296,9 @@ namespace WebApp2.Controllers
             for (int i = 0; i < orderCompositions.Count; i++)
             {
                 var item = orderCompositions[i];
+
                 worksheet.Cells[i + 2, 1].Value = item.BrosShopAttributes.BrosShopProduct.BrosShopTitle; // Название товара
+
                 worksheet.Cells[i + 2, 2].Value = item.BrosShopQuantity; // Количество
                 worksheet.Cells[i + 2, 3].Value = item.BrosShopCost; // Цена за единицу
                 worksheet.Cells[i + 2, 4].Value = item.BrosShopCost * item.BrosShopQuantity; // Итоговая стоимость

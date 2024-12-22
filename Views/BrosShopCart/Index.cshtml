@@ -1,4 +1,4 @@
-﻿@using System.Globalization
+@using System.Globalization
 @model WebApp2.Models.CartViewModel
 @{
     ViewData["Title"] = "Корзина";
@@ -139,6 +139,9 @@ else
                     // Если обновление прошло успешно, обновляем отображение цены
                     updatePriceDisplay(productId, sizeId, quantity);
                     console.log("Корзина обновлена!");
+                     // Обновляем отображение цены и общей суммы
+                    updatePriceDisplay(productId, quantity); // Обновляем отображение цены
+
                     updateTotalAmount(); // Обновляем общую сумму
                 } else {
                     // Если произошла ошибка, показываем сообщение пользователю
@@ -155,7 +158,8 @@ else
         var priceCell = document.getElementById('price-' + productId + '-' + sizeId);
         var originalPrice = parseFloat(priceCell.getAttribute('data-original-price')); // Извлекаем исходную цену из атрибута
         var newPrice = originalPrice * quantity; // Рассчитываем новую цену
-        priceCell.innerText = newPrice.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' }); // Форматируем цену
+        priceCell.innerText = newPrice.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB', currencyDisplay: 'symbol' }); // Форматируем цену
+
     }
 
     function updateTotalAmount() {
@@ -173,7 +177,7 @@ else
             }
         });
         var totalAmountDisplay = document.getElementById('totalAmount');
-        totalAmountDisplay.innerText = totalAmount.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' }); // Форматируем общую сумму
+        totalAmountDisplay.innerText = totalAmount.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB', currencyDisplay: 'symbol' }); // Форматируем общую сумму
     }
 </script>
 

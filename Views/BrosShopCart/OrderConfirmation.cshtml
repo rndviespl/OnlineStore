@@ -1,4 +1,4 @@
-﻿@model List<WebApp2.Controllers.BrosShopCartController.OrderDetail>
+@model List<WebApp2.Controllers.BrosShopCartController.OrderDetail>
 
 @{
     ViewData["Title"] = "Подтверждение заказа";
@@ -58,9 +58,12 @@ else
 }
 
 <h3>Оплата:</h3>
+
 <p>Обратите внимание, что оплата будет производиться после того, как вы осмотрите товар. Это означает, что вы можете сделать предзаказ, и мы закажем товар под ваши нужды. В течении 3 часов с вами свяжется менеджер для обсуждения заказа, примерных сроков доставки и так далее.</p>
+
 <!-- Кнопка для экспорта данных заказа в Excel -->
 <form method="post" action="@Url.Action("ExportToExcel", "BrosShopCart")">
     <input type="hidden" name="orderId" value="@ViewBag.OrderId" /> <!-- Предполагается, что OrderId передается через ViewBag -->
     <button type="submit" class="btn btn-primary">Экспортировать в Excel</button>
 </form>
+
