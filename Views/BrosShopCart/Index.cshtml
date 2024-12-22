@@ -78,7 +78,7 @@ else
                                 <button type="button" class="btn btn-secondary" style="width: 30px;" onclick="changeQuantity('@item.ProductId', '@item.SizeId', 1)">+</button>
                             </div>
                         </td>
-                        <td id="price-@item.ProductId-@item.SizeId" data-original-price="@product.BrosShopPrice.ToString("F2")">@itemTotalPrice.ToString("C") </td>
+                        <td id="price-@item.ProductId-@item.SizeId" data-original-price="@product.BrosShopPrice.ToString("F2")">@itemTotalPrice.ToString("F2") ₽</td>
                         <td>
                             <form asp-action="RemoveFromCart" method="post" style="display:inline;">
                                 <input type="hidden" name="productId" value="@item.ProductId" />
@@ -92,7 +92,7 @@ else
         </tbody>
     </table>
 
-    <h4>Сумма к оплате: <span id="totalAmount">@totalAmount.ToString("F2")</span> ₽</h4>
+    <h4>Сумма к оплате: <span id="totalAmount">@totalAmount.ToString("F2") ₽</span></h4>
 
     @if (!Context.Request.Cookies.ContainsKey("Token"))
     {
@@ -139,12 +139,8 @@ else
                     // Если обновление прошло успешно, обновляем отображение цены
                     updatePriceDisplay(productId, sizeId, quantity);
                     console.log("Корзина обновлена!");
-                     // Обновляем отображение цены и общей суммы
-                    updatePriceDisplay(productId, quantity); // Обновляем отображение цены
-
                     updateTotalAmount(); // Обновляем общую сумму
                 } else {
-                    // Если произошла ошибка, показываем сообщение пользователю
                     alert(response.message);
                 }
             },
@@ -158,8 +154,7 @@ else
         var priceCell = document.getElementById('price-' + productId + '-' + sizeId);
         var originalPrice = parseFloat(priceCell.getAttribute('data-original-price')); // Извлекаем исходную цену из атрибута
         var newPrice = originalPrice * quantity; // Рассчитываем новую цену
-        priceCell.innerText = newPrice.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB', currencyDisplay: 'symbol' }); // Форматируем цену
-
+        priceCell.innerText = newPrice.toFixed(2) + " ₽"; // Форматируем цену с двумя знаками после запятой и добавляем символ "₽"
     }
 
     function updateTotalAmount() {
@@ -171,13 +166,13 @@ else
 
             if (priceCell && quantityInput) {
                 // Извлекаем общую цену для товара
-                var itemTotalPrice = parseFloat(priceCell.innerText.replace(/[^0-9,.-]+/g, "").replace(",", "."));
+                var itemTotalPrice = parseFloat(priceCell.innerText.replace(" ₽", "").replace(",", ".")); // Убираем символ "₽" и форматируем
                 var quantity = parseInt(quantityInput.value); // Получаем текущее количество
                 totalAmount += itemTotalPrice; // Суммируем общую стоимость
             }
         });
         var totalAmountDisplay = document.getElementById('totalAmount');
-        totalAmountDisplay.innerText = totalAmount.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB', currencyDisplay: 'symbol' }); // Форматируем общую сумму
+        totalAmountDisplay.innerText = totalAmount.toFixed(2) + " ₽"; // Форматируем общую сумму с двумя знаками после запятой и добавляем символ "₽"
     }
 </script>
 
