@@ -15,10 +15,12 @@ namespace WebApp2.Controllers
     {
         private readonly ApplicationContext _context;
         private const string CartCookieKey = "Cart";
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public BrosShopProductsController(ApplicationContext context)
+        public BrosShopProductsController(ApplicationContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         // GET: BrosShopProducts
@@ -51,63 +53,58 @@ namespace WebApp2.Controllers
             return View(brosShopProduct);
         }
 
-
-        // POST: BrosShopProducts/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public class AddToCartResponse
         {
-            var brosShopProduct = await _context.BrosShopProducts.FindAsync(id);
-            if (brosShopProduct != null)
-            {
-                _context.BrosShopProducts.Remove(brosShopProduct);
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            public bool Success { get; set; }
+            public string Message { get; set; }
         }
-
-        private bool BrosShopProductExists(int id)
-        {
-            return _context.BrosShopProducts.Any(e => e.BrosShopProductId == id);
-        }
-
 
         [HttpPost]
-        public IActionResult AddToCart(int productId, int quantity, int sizeId) // Change size parameter to sizeId
+        public IActionResult AddToCart(int productId, int quantity, int sizeId)
         {
             if (quantity <= 0)
             {
-                return Json(new { success = false, message = "Количество должно быть больше нуля." });
+                return Json(new AddToCartResponse { Success = false, Message = "Количество должно быть больше нуля." });
+            }
+
+            // Проверяем, существует ли продукт
+            var productExists = _context.BrosShopProducts.Any(p => p.BrosShopProductId == productId);
+            if (!productExists)
+            {
+                return Json(new AddToCartResponse { Success = false, Message = "Товар не найден." });
             }
 
             var cartItems = GetCartFromCookies();
-            var existingItem = cartItems.FirstOrDefault(i => i.ProductId == productId && i.SizeId == sizeId); // Check for existing item with the same sizeId
+            var existingItem = cartItems.FirstOrDefault(i => i.ProductId == productId && i.SizeId == sizeId);
 
             if (existingItem != null)
             {
-                existingItem.Quantity += quantity; // Increase quantity if item already in cart
+                existingItem.Quantity += quantity; // Увеличиваем количество, если товар уже в корзине
             }
             else
             {
-                cartItems.Add(new CartItem { ProductId = productId, Quantity = quantity, SizeId = sizeId }); // Add new item with sizeId
+                cartItems.Add(new CartItem { ProductId = productId, Quantity = quantity, SizeId = sizeId }); // Добавляем новый товар
             }
 
             SaveCartToCookies(cartItems);
 
-            // Return JSON response
-            return Json(new { success = true, message = "Товар добавлен в корзину!" });
+            return Json(new AddToCartResponse { Success = true, Message = "Товар добавлен в корзину!" });
         }
 
 
-        private List<CartItem> GetCartFromCookies()
+
+
+        protected List<CartItem> GetCartFromCookies()
         {
             if (Request.Cookies.TryGetValue(CartCookieKey, out var cookieValue))
             {
                 return JsonConvert.DeserializeObject<List<CartItem>>(cookieValue) ?? new List<CartItem>();
             }
-            return new List<CartItem>();
+            return new List<CartItem>(); // Возвращаем пустой список, если куки отсутствуют
         }
+
+
+
 
         private void SaveCartToCookies(List<CartItem> cartItems)
         {
@@ -120,4 +117,19 @@ namespace WebApp2.Controllers
             Response.Cookies.Append(CartCookieKey, cookieValue, cookieOptions);
         }
     }
+
+    public class TestableBrosShopProductsController : BrosShopProductsController
+    {
+        public TestableBrosShopProductsController(ApplicationContext context, IHttpContextAccessor httpContextAccessor)
+            : base(context, httpContextAccessor)
+        {
+        }
+
+        public List<CartItem> GetCartItemsForTesting()
+        {
+            return GetCartFromCookies();
+        }
+    }
+
+
 }

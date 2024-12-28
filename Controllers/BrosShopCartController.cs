@@ -256,6 +256,7 @@ namespace WebApp2.Controllers
             SaveCartToCookies(cartItems);
             return RedirectToAction("Index");
         }
+
         [HttpPost]
         public async Task<IActionResult> ExportToExcel(int orderId)
         {
@@ -288,9 +289,10 @@ namespace WebApp2.Controllers
 
             // Заголовки
             worksheet.Cells[1, 1].Value = "Товар";
-            worksheet.Cells[1, 2].Value = "Количество";
-            worksheet.Cells[1, 3].Value = "Цена за единицу";
-            worksheet.Cells[1, 4].Value = "Итоговая стоимость";
+            worksheet.Cells[1, 2].Value = "размер";
+            worksheet.Cells[1, 3].Value = "Количество";
+            worksheet.Cells[1, 4].Value = "Цена за единицу";
+            worksheet.Cells[1, 5].Value = "Итоговая стоимость";
 
             // Заполнение данными
             for (int i = 0; i < orderCompositions.Count; i++)
@@ -298,19 +300,19 @@ namespace WebApp2.Controllers
                 var item = orderCompositions[i];
 
                 worksheet.Cells[i + 2, 1].Value = item.BrosShopAttributes.BrosShopProduct.BrosShopTitle; // Название товара
-
-                worksheet.Cells[i + 2, 2].Value = item.BrosShopQuantity; // Количество
-                worksheet.Cells[i + 2, 3].Value = item.BrosShopCost; // Цена за единицу
-                worksheet.Cells[i + 2, 4].Value = item.BrosShopCost * item.BrosShopQuantity; // Итоговая стоимость
+                worksheet.Cells[i + 2, 2].Value = item.BrosShopAttributes.BrosShopSizeNavigation.SizeId; // Название товара
+                worksheet.Cells[i + 2, 3].Value = item.BrosShopQuantity; // Количество
+                worksheet.Cells[i + 2, 4].Value = item.BrosShopCost; // Цена за единицу
+                worksheet.Cells[i + 2, 5].Value = item.BrosShopCost * item.BrosShopQuantity; // Итоговая стоимость
             }
 
-            // Форматирование столбцов
-            worksheet.Column(1).AutoFit(); // Автоширина для первого столбца
-            worksheet.Column(2).AutoFit(); // Автоширина для второго столбца
-            worksheet.Column(3).Style.Numberformat.Format = "0.00"; // Формат для цены
-            worksheet.Column(4).Style.Numberformat.Format = "0.00"; // Формат для итоговой стоимости
-            worksheet.Column(3).AutoFit(); // Автоширина для третьего столбца
-            worksheet.Column(4).AutoFit(); // Автоширина для четвертого столбца
+            worksheet.Column(1).AutoFit(); 
+            worksheet.Column(2).AutoFit(); 
+            worksheet.Column(3).AutoFit(); 
+            worksheet.Column(4).Style.Numberformat.Format = "0.00"; 
+            worksheet.Column(5).Style.Numberformat.Format = "0.00"; 
+            worksheet.Column(4).AutoFit(); 
+            worksheet.Column(5).AutoFit(); 
 
             return package;
         }

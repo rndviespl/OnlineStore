@@ -1,13 +1,19 @@
 ﻿@model IEnumerable<WebApp2.Models.BrosShopProduct>
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] = "Index";</title>
-     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/WebApp2.styles.css" asp-append-version="true" />
 </head>
 
+<!--
+    Представление для отображения каталога товаров.
+    Модель представляет собой коллекцию объектов типа BrosShopProduct.
+    Каждый товар отображается в виде карточки с изображением, названием, ценой и описанием.
+-->
 
 <h1>Каталог товаров</h1>
 <div class="row mb-4">
@@ -15,6 +21,7 @@
     @foreach (var item in Model)
     {
         <div class="col-md-4">
+            <!-- Ссылка на страницу деталей товара с передачей идентификатора товара -->
             <a asp-action="Details" asp-route-id="@item.BrosShopProductId" class="text-decoration-none">
                 <div class="card mb-4 shadow-sm">
                     <div class="row no-gutters">
@@ -24,17 +31,21 @@
                                     @{
                                         // Получаем URL изображения товара
                                         var imageUrl = Url.Action("GetImageForProductId", "BrosShopImages", new { productId = item.BrosShopProductId });
-                                        // Проверяем, существует ли изображение
+                                        // Проверяем, существует ли изображение, и задаем изображение по умолчанию
                                         var defaultImageUrl = Url.Content("~/source/no_photo.jpg"); // Изображение по умолчанию
                                     }
+                                    <!-- Изображение товара с обработкой ошибки загрузки -->
                                     <img src="@imageUrl" class="fixed-image" alt="Image for @item.BrosShopTitle" onerror="this.onerror=null; this.src='@defaultImageUrl';" />
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="card-body">
+                                <!-- Название товара -->
                                 <h5 class="card-title">@Html.DisplayFor(modelItem => item.BrosShopTitle)</h5>
+                                <!-- Цена товара -->
                                 <p><strong>Цена:</strong> @Html.DisplayFor(modelItem => item.BrosShopPrice)</p>
+                                <!-- Описание товара -->
                                 <p class="card-text">
                                     <strong>Описание товара:</strong>
                                     <span class="description-text">@Html.DisplayFor(modelItem => item.BrosShopDescription)</span>
@@ -47,5 +58,3 @@
         </div>
     }
 </div>
-
-<div class="mb-5"></div> 

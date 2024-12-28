@@ -30,14 +30,19 @@ namespace WebApp2.Controllers
             return View(await applicationContext.ToListAsync());
         }
 
+        /// <summary>
+        /// Загружает изображение по его идентификатору.
+        /// </summary>
+        /// <param name="imageId">Идентификатор изображения.</param>
+        /// <returns>Файл изображения с правильным MIME-типом или 404, если изображение не найдено.</returns>
         [HttpGet]
-        // Метод для получения изображения по ID изображения
         public async Task<IActionResult> GetImage(int imageId)
         {
             // Получаем изображение по его идентификатору
             var image = await _context.BrosShopImages
                 .FirstOrDefaultAsync(i => i.BrosShopImagesId == imageId); // Используем BrosShopImagesId
 
+            // Проверяем, найдено ли изображение
             if (image == null)
             {
                 return NotFound(); // Если изображение не найдено, возвращаем 404
@@ -46,22 +51,26 @@ namespace WebApp2.Controllers
             // Шаг 2: Получаем BaseUrl из конфигурации
             var baseUrl = _configuration["ApiSettings:BaseUrl"];
 
-            // Шаг 3: Конструируем полный URL API
+            // Шаг 3: Конструируем полный URL API для получения изображения
             var apiUrl = $"{baseUrl}{image.BrosShopImagesId}";
 
-            //Получаем изображение из API
+            // Получаем изображение из API
             using (var localhttp = _httpClient)
             {
                 var response = await localhttp.GetAsync(apiUrl);
 
+                // Проверяем успешность запроса к API
                 if (response.IsSuccessStatusCode)
                 {
-                    return File(await response.Content.ReadAsStreamAsync(), "image/jpeg"); // Возвращаем изображение с правильным MIME-типом
+                    // Возвращаем изображение с правильным MIME-типом
+                    return File(await response.Content.ReadAsStreamAsync(), "image/jpeg");
                 }
             }
 
-            return NotFound(); // Если запрос к API не успешен, возвращаем 404
+            // Если запрос к API не успешен, возвращаем 404
+            return NotFound();
         }
+
 
         // GET: BrosShopImages/GetImage/{productId}
         [HttpGet]
